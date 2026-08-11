@@ -1,0 +1,176 @@
+diff --git a/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs b/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs
+index 1ae632a9..e061ddb3 100644
+--- a/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs	
++++ b/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs	
+@@ -5,6 +5,8 @@ using System.Linq;
+ using System.Runtime.CompilerServices;
+ using System.Threading.Tasks;
+ using System.Windows;
++using System.Windows.Controls;
++using System.Windows.Controls.Primitives;
+ using System.Windows.Input;
+ using System.Windows.Media.Animation;
+ using Hearthstone_Deck_Tracker.Utility;
+@@ -66,6 +68,12 @@ public partial class AnimatedCard : IPoolItem, IDisposable, INotifyPropertyChang
+ 
+ 	public Hearthstone.Card? Card => DataContext as Hearthstone.Card;
+ 
++	public PlacementMode CardTooltipPlacement
++	{
++		get => ToolTipService.GetPlacement(CardTileControl);
++		set => ToolTipService.SetPlacement(CardTileControl, value);
++	}
++
+ 	private CardTileViewModel? _cardTileViewModel;
+ 	public CardTileViewModel? CardTileViewModel
+ 	{
+diff --git a/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs b/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs
+index cfe88a99..c69dc568 100644
+--- a/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs	
++++ b/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs	
+@@ -38,6 +38,8 @@ public partial class AnimatedCardList
+ 
+ 	public bool ShowPinButton { get; set; }
+ 
++	public PlacementMode CardTooltipPlacement { get; set; } = PlacementMode.Right;
++
+ 	private Func<Hearthstone.Card, IEnumerable<Hearthstone.Card>, HighlightColor>? _shouldHighlightCard;
+ 	public Func<Hearthstone.Card, IEnumerable<Hearthstone.Card>, HighlightColor>? ShouldHighlightCard
+ 	{
+@@ -185,6 +187,7 @@ public partial class AnimatedCardList
+ 	private AnimatedCard GetAnimatedCard(Hearthstone.Card card)
+ 	{
+ 		var animatedCard = _animatedCardPool.GetOrCreate();
++		animatedCard.CardTooltipPlacement = CardTooltipPlacement;
+ 		animatedCard.Update(card, ShowTier7InspirationButton && card.IsBaconMinion);
+ 		animatedCard.ShowPinButton = ShowPinButton;
+ 		animatedCard.MaxHeight = ViewModel.MaxHeightCard;
+diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Minions/BattlegroundsCardsGroup.xaml b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Minions/BattlegroundsCardsGroup.xaml
+index 9b9fdd6b..af12096a 100644
+--- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Minions/BattlegroundsCardsGroup.xaml	
++++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Minions/BattlegroundsCardsGroup.xaml	
+@@ -65,7 +65,7 @@
+                         />
+                     </DockPanel>
+                 </Border>
+-                <controls:AnimatedCardList x:Name="CardsList"/>
++                <controls:AnimatedCardList x:Name="CardsList" CardTooltipPlacement="Left"/>
+             </StackPanel>
+         </Grid>
+     </Border>
+diff --git a/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml b/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml
+index 1ca97d8f..16adc219 100644
+--- a/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml	
++++ b/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml	
+@@ -8,82 +8,33 @@
+              xmlns:lex="http://wpflocalizeextension.codeplex.com"
+              mc:Ignorable="d"
+              DataContextChanged="CardTooltip_OnDataContextChanged"
++             Tag="HDT_WINE_TOOLTIP_NO_ZERO_STATE"
+              d:DesignHeight="256" d:DesignWidth="256">
+     <UserControl.Resources>
+         <controls:CardImageSizeConverter x:Key="CardImageSizeConverter"/>
+         <Style TargetType="Image">
+             <Setter Property="RenderOptions.BitmapScalingMode" Value="Fant"/>
+         </Style>
+-        <Storyboard x:Key="StoryboardShow">
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2" />
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2" />
+-        </Storyboard>
+-        <Storyboard x:Key="StoryboardShowDelayed">
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2" BeginTime="0:0:0.8" />
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2" BeginTime="0:0:0.8" />
+-        </Storyboard>
+-        <Storyboard x:Key="StoryboardHide">
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="0" Duration="0:0:0" />
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="0" Duration="0:0:0" />
+-        </Storyboard>
+-        <Storyboard x:Key="StoryboardFadeInDelayed">
+-            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2" BeginTime="0:0:0.3" />
+-        </Storyboard>
+-        <Storyboard x:Key="StoryboardFadeOutInstant">
+-            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0" />
+-        </Storyboard>
+     </UserControl.Resources>
+     <DockPanel DataContext="{Binding ViewModel, RelativeSource={RelativeSource AncestorType=UserControl}}">
+ 
+         <!-- Primary Image -->
+-        <Grid Name="PrimaryImage" DockPanel.Dock="{Binding ImageDock}" Visibility="{Binding AssetViewModel, Converter={StaticResource NullableToVisibility}, ConverterParameter={x:Static Visibility.Hidden}}" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Center"
++        <!-- Wine can miss an immediate WPF storyboard transition when this tooltip is
++             inserted into the transparent overlay. Never create a zero-scale visual:
++             its dirty rectangle is otherwise presented as an opaque black region. -->
++        <Grid Name="PrimaryImage" DockPanel.Dock="{Binding ImageDock}" Visibility="{Binding AssetViewModel, Converter={StaticResource NullableToVisibility}, ConverterParameter={x:Static Visibility.Hidden}}" VerticalAlignment="Center"
+               Margin="{Binding CardImageOffset}"
+               MaxWidth="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Width}}"
+               MaxHeight="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Height}}">
+-            <Grid.RenderTransform>
+-                <ScaleTransform ScaleX="0" ScaleY="0"/>
+-            </Grid.RenderTransform>
+-            <Grid.Style>
+-                <Style TargetType="Grid">
+-                    <Style.Triggers>
+-                        <DataTrigger Binding="{Binding Path=IsVisible, RelativeSource={RelativeSource Self}}" Value="True">
+-                            <DataTrigger.EnterActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardShow}"/>
+-                            </DataTrigger.EnterActions>
+-                            <DataTrigger.ExitActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardHide}"/>
+-                            </DataTrigger.ExitActions>
+-                        </DataTrigger>
+-                    </Style.Triggers>
+-                </Style>
+-            </Grid.Style>
+             <hdt:HearthstoneTextBlock Text="{Binding Text}" Visibility="{Binding Text, Converter={StaticResource NullableToVisibility}}" HorizontalAlignment="Center" VerticalAlignment="Top" d:Text="Created By" FontSize="16"/>
+             <Image Source="{Binding AssetViewModel.Asset}" HorizontalAlignment="Center" />
+         </Grid>
+ 
+         <!-- Secondary Image, e.g. Battlegrounds Triple -->
+-        <Image DockPanel.Dock="{Binding ImageDock}" Source="{Binding SecondaryAssetViewModel.Asset}" Visibility="{Binding SecondaryAssetViewModel, Converter={StaticResource NullableToVisibility}}" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Center"
++        <Image DockPanel.Dock="{Binding ImageDock}" Source="{Binding SecondaryAssetViewModel.Asset}" Visibility="{Binding SecondaryAssetViewModel, Converter={StaticResource NullableToVisibility}}" VerticalAlignment="Center"
+               Margin="{Binding CardImageOffset}"
+               MaxWidth="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Width}}"
+-              MaxHeight="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Height}}">
+-            <Image.RenderTransform>
+-                <ScaleTransform ScaleX="0" ScaleY="0"/>
+-            </Image.RenderTransform>
+-            <Image.Style>
+-                <Style TargetType="Image">
+-                    <Style.Triggers>
+-                        <DataTrigger Binding="{Binding Path=IsVisible, RelativeSource={RelativeSource Self}}" Value="True">
+-                            <DataTrigger.EnterActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardShowDelayed}"/>
+-                            </DataTrigger.EnterActions>
+-                            <DataTrigger.ExitActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardHide}"/>
+-                            </DataTrigger.ExitActions>
+-                        </DataTrigger>
+-                    </Style.Triggers>
+-                </Style>
+-            </Image.Style>
+-        </Image>
++              MaxHeight="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Height}}"/>
+ 
+         <controls:GridCardImages DockPanel.Dock="{Binding ImageDock}" Cards="{Binding RelatedCards}" Title="{Binding RelatedCardsHeader}" Visibility="{Binding RelatedCards, Converter={StaticResource NullableToVisibility}}" VerticalAlignment="Center">
+             <controls:GridCardImages.LayoutTransform>
+@@ -91,21 +42,6 @@
+                     ScaleX="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}}"
+                     ScaleY="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}}" />
+             </controls:GridCardImages.LayoutTransform>
+-            <controls:GridCardImages.Style>
+-                <Style TargetType="controls:GridCardImages">
+-                    <Setter Property="Opacity" Value="0"/>
+-                    <Style.Triggers>
+-                        <DataTrigger Binding="{Binding Path=IsVisible, RelativeSource={RelativeSource Self}}" Value="True">
+-                            <DataTrigger.EnterActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardFadeInDelayed}"/>
+-                            </DataTrigger.EnterActions>
+-                            <DataTrigger.ExitActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardFadeOutInstant}"/>
+-                            </DataTrigger.ExitActions>
+-                        </DataTrigger>
+-                    </Style.Triggers>
+-                </Style>
+-            </controls:GridCardImages.Style>
+         </controls:GridCardImages>
+     </DockPanel>
+ </UserControl>

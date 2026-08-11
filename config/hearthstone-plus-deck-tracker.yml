@@ -1,0 +1,25 @@
+game:
+  arch: win64
+  exe: drive_c/hdt-hearthstone-launcher.bat
+  prefix: /home/mike/Games/hs/battlenet
+game_slug: hearthstone-plus-deck-tracker
+name: Hearthstone + Deck Tracker
+slug: hearthstone-plus-deck-tracker
+system:
+  prelaunch_command: /home/mike/.local/share/lutris/scripts/hdt-prelaunch.py
+  prelaunch_wait: true
+  env:
+    DXVK_HUD: compiler
+    DXVK_STATE_CACHE_PATH: /home/mike/Games/hs/battlenet
+    STAGING_SHARED_MEMORY: '1'
+    __GL_SHADER_DISK_CACHE: '1'
+    __GL_SHADER_DISK_CACHE_PATH: /home/mike/Games/hs/battlenet
+    __GL_SHADER_DISK_CACHE_SKIP_CLEANUP: '1'
+version: Battle.net launcher + HDT
+wine:
+  battleye: false
+  eac: false
+  fsr: false
+  override:
+    locationapi: d
+year: 2014

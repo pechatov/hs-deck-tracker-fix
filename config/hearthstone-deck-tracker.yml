@@ -1,0 +1,7 @@
+game:
+  exe: /home/mike/Games/hs/battlenet/drive_c/users/steamuser/AppData/Local/HearthstoneDeckTracker/Hearthstone
+    Deck Tracker/Hearthstone Deck Tracker.exe
+  prefix: /home/mike/Games/hs/battlenet
+system:
+  prelaunch_command: /home/mike/.local/share/lutris/scripts/hdt-prelaunch.py
+  prelaunch_wait: true

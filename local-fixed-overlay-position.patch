@@ -1,0 +1,65 @@
+diff --git a/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs b/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs
+index a35160b0..2c42a5b7 100644
+--- a/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs	
++++ b/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs	
+@@ -28,6 +28,20 @@ namespace Hearthstone_Deck_Tracker.Windows
+ {
+ 	public partial class OverlayWindow
+ 	{
++		// Wine can report the virtual desktop as Hearthstone's client rectangle
++		// during minimize/restore. That permanently moves all center-anchored
++		// overlay elements until the next successful position update. This local
++		// build targets the fixed DP-1 game area, so keep one invariant coordinate
++		// system for the complete lifetime of the overlay window. These are the
++		// physical Win32/X11 coordinates reported by Wine. WPF/Hyprland maps them
++		// through the monitor's 1.25 scale to approximately 11,50 2730x1091.
++		private const int WineFixedOverlayLeft = 3453;
++		private const int WineFixedOverlayTop = 62;
++		private const int WineFixedOverlayWidth = 3412;
++		private const int WineFixedOverlayHeight = 1363;
++		private const string WineFixedOverlayMarker = "HDT_WINE_FIXED_OVERLAY_2730X1091";
++		private bool _wineFixedOverlayBoundsLogged;
++
+ 		private async void SetTopmost()
+ 		{
+ 			if(User32.GetHearthstoneWindow() == IntPtr.Zero)
+@@ -323,16 +337,36 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 
+ 		public void UpdatePosition()
+ 		{
+-			var hsRect = User32.GetHearthstoneRect(true);
++			// Never sample geometry while Unity is minimized. Wine may return a
++			// transient virtual-desktop-sized client rect at that point.
++			if(User32.GetHearthstoneWindowState() == WindowState.Minimized)
++				return;
++
++			var observedHsRect = User32.GetHearthstoneRect(true);
+ 
+ 			//hs window has height 0 if it just launched, screwing things up if the tracker is started before hs is.
+ 			//this prevents that from happening.
+-			if(hsRect.Height == 0 || (!IsContentVisible && Core.Windows.CapturableOverlay == null))
++			if(observedHsRect.Height == 0 || (!IsContentVisible && Core.Windows.CapturableOverlay == null))
+ 				return;
+ 
++			if(!_wineFixedOverlayBoundsLogged)
++			{
++				Log.Info($"{WineFixedOverlayMarker}: locking overlay to "
++					+ $"{WineFixedOverlayLeft},{WineFixedOverlayTop} "
++					+ $"{WineFixedOverlayWidth}x{WineFixedOverlayHeight}; "
++					+ $"Wine reported {observedHsRect.Left},{observedHsRect.Top} "
++					+ $"{observedHsRect.Width}x{observedHsRect.Height}");
++				_wineFixedOverlayBoundsLogged = true;
++			}
++
+ 			var prevWidth = Width;
+ 			var prevHeight = Height;
+-			SetRect(hsRect.Top, hsRect.Left, hsRect.Width, hsRect.Height);
++			SetRect(
++				WineFixedOverlayTop,
++				WineFixedOverlayLeft,
++				WineFixedOverlayWidth,
++				WineFixedOverlayHeight
++			);
+ 			if(Width != prevWidth || Height != prevHeight)
+ 			{
+ 				OnPropertyChanged(nameof(BoardWidth));

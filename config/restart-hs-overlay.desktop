@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Перезапустить HS Overlay
+Name[en]=Restart HS Overlay
+Comment=Перезапустить Deck Tracker поверх текущего Hearthstone
+Comment[en]=Restart Deck Tracker over the currently running Hearthstone
+Icon=hearthstone-deck-tracker
+Exec=/home/mike/.local/bin/restart-hs-overlay
+Terminal=false
+StartupNotify=false
+Categories=Game;
+Keywords=HDT;Deck Tracker;Overlay;Hearthstone;перезапустить;оверлей;

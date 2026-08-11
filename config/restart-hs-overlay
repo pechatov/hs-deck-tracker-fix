@@ -1,0 +1,412 @@
+#!/usr/bin/env python3
+"""Restart only Hearthstone Deck Tracker while Hearthstone keeps running."""
+
+from __future__ import annotations
+
+import fcntl
+import json
+import os
+import re
+import shutil
+import signal
+import subprocess
+import time
+from pathlib import Path
+
+
+GAME_TITLE = "Hearthstone"
+HDT_TITLE = "Hearthstone Deck Tracker"
+OVERLAY_TITLE = "HearthstoneOverlay"
+GAME_PROCESS = "hearthstone.exe"
+HDT_PROCESS = "hearthstone deck tracker.exe"
+PREFIX_ROOT = Path("/home/mike/Games/hs/battlenet")
+HDT_EXE = (
+    PREFIX_ROOT
+    / "drive_c/users/steamuser/AppData/Local/HearthstoneDeckTracker"
+    / "Hearthstone Deck Tracker/Hearthstone Deck Tracker.exe"
+)
+HDT_PRELAUNCH = Path("/home/mike/.local/share/lutris/scripts/hdt-prelaunch.py")
+ICON = "hearthstone-deck-tracker"
+START_TIMEOUT_SECONDS = 60.0
+CLEAN_CLOSE_TIMEOUT_SECONDS = 8.0
+TERM_TIMEOUT_SECONDS = 5.0
+POLL_SECONDS = 0.25
+RUNTIME_ENV_NAMES = {
+    "GAMEID",
+    "STORE",
+    "WINEDEBUG",
+    "WINEDLLOVERRIDES",
+    "WINEESYNC",
+    "WINEFSYNC",
+}
+RUNTIME_ENV_PREFIXES = (
+    "DXVK_",
+    "PROTON",
+    "STAGING_",
+    "STEAM_COMPAT_",
+    "UMU_",
+    "VKD3D_",
+    "__GL_SHADER_",
+)
+
+RUNTIME_DIR = Path(os.environ.get("XDG_RUNTIME_DIR", f"/tmp/runtime-{os.getuid()}"))
+LOCK_PATH = RUNTIME_DIR / "hdt-overlay-restart.lock"
+LOG_PATH = RUNTIME_DIR / "hdt-overlay-restart.log"
+
+
+def log(message: str) -> None:
+    """Append a compact diagnostic record without making restart depend on it."""
+    try:
+        RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
+        with LOG_PATH.open("a", encoding="utf-8") as output:
+            output.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {message}\n")
+    except OSError:
+        pass
+
+
+def notify(summary: str, body: str, urgency: str = "normal") -> None:
+    """Show one replaceable Dunst notification."""
+    command = shutil.which("notify-send")
+    if command is None:
+        return
+    subprocess.run(
+        [
+            command,
+            "-a",
+            "HDT Overlay",
+            "-i",
+            ICON,
+            "-u",
+            urgency,
+            "-h",
+            "string:x-dunst-stack-tag:hdt-overlay-restart",
+            summary,
+            body,
+        ],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
+
+def run(*args: str) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        args,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+
+
+def hypr_clients() -> list[dict[str, object]]:
+    result = run("hyprctl", "-j", "clients")
+    if result.returncode != 0:
+        return []
+    try:
+        clients = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return []
+    return [client for client in clients if isinstance(client, dict)]
+
+
+def title_exists(title: str) -> bool:
+    if any(client.get("title") == title for client in hypr_clients()):
+        return True
+    result = run("xdotool", "search", "--name", f"^{re.escape(title)}$")
+    return result.returncode == 0 and bool(result.stdout.split())
+
+
+def process_is_live(pid: int) -> bool:
+    """Reject Wine processes that exited but have not yet been reaped."""
+    try:
+        stat = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+    except OSError:
+        return False
+    tail = stat.rsplit(")", 1)
+    return len(tail) == 2 and tail[1].split() and tail[1].split()[0] != "Z"
+
+
+def process_environment(pid: int) -> dict[str, str]:
+    """Read the launch environment inherited by one live Windows process."""
+    try:
+        entries = Path(f"/proc/{pid}/environ").read_bytes().split(b"\0")
+    except OSError:
+        return {}
+    environment: dict[str, str] = {}
+    for entry in entries:
+        key, separator, value = entry.partition(b"=")
+        if not separator:
+            continue
+        environment[key.decode(errors="replace")] = value.decode(errors="replace")
+    return environment
+
+
+def exact_executable_pids(executable_name: str) -> set[int]:
+    """Find a live Windows process by argv[0], never its Lutris/UMU wrappers."""
+    result: set[int] = set()
+    own_pid = os.getpid()
+    for cmdline_path in Path("/proc").glob("[0-9]*/cmdline"):
+        try:
+            pid = int(cmdline_path.parent.name)
+            if pid == own_pid or not process_is_live(pid):
+                continue
+            argv = cmdline_path.read_bytes().split(b"\0")
+        except (OSError, ValueError):
+            continue
+        if not argv or not argv[0]:
+            continue
+        executable = (
+            argv[0]
+            .decode("utf-8", errors="replace")
+            .replace("\\", "/")
+            .rsplit("/", 1)[-1]
+            .casefold()
+        )
+        if executable == executable_name:
+            result.add(pid)
+    return result
+
+
+def game_is_running() -> bool:
+    # A crashed Wine client can leave a stale XWayland window behind. Only the
+    # real, non-zombie Windows process is authoritative here.
+    return bool(exact_executable_pids(GAME_PROCESS))
+
+
+def hdt_pids() -> set[int]:
+    return exact_executable_pids(HDT_PROCESS)
+
+
+def exact_window_ids(title: str) -> list[str]:
+    result = run("xdotool", "search", "--name", f"^{re.escape(title)}$")
+    if result.returncode != 0:
+        return []
+    window_ids: list[str] = []
+    for window_id in result.stdout.split():
+        actual = run("xdotool", "getwindowname", window_id)
+        if actual.returncode == 0 and actual.stdout.strip() == title:
+            window_ids.append(window_id)
+    return window_ids
+
+
+def wait_for_hdt_exit(timeout: float) -> set[int]:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        remaining = hdt_pids()
+        if not remaining:
+            return set()
+        time.sleep(POLL_SECONDS)
+    return hdt_pids()
+
+
+def signal_hdt(pids: set[int], sig: signal.Signals) -> None:
+    """Signal only processes whose current command still belongs to HDT."""
+    current = hdt_pids()
+    for pid in pids & current:
+        try:
+            os.kill(pid, sig)
+        except (ProcessLookupError, PermissionError):
+            continue
+
+
+def stop_hdt() -> bool:
+    previous_pids = hdt_pids()
+    if not previous_pids:
+        log("HDT was not running; starting a fresh instance")
+        return True
+
+    main_windows = exact_window_ids(HDT_TITLE)
+    if main_windows:
+        log(f"Requesting clean HDT shutdown via {len(main_windows)} main window(s)")
+        for window_id in main_windows:
+            run("xdotool", "windowclose", window_id)
+        remaining = wait_for_hdt_exit(CLEAN_CLOSE_TIMEOUT_SECONDS)
+    else:
+        log("HDT main window is missing; skipping WM_CLOSE")
+        remaining = previous_pids
+
+    if remaining:
+        log(f"Clean shutdown timed out; sending SIGTERM to {sorted(remaining)}")
+        signal_hdt(remaining, signal.SIGTERM)
+        remaining = wait_for_hdt_exit(TERM_TIMEOUT_SECONDS)
+
+    if remaining:
+        log(f"SIGTERM timed out; sending SIGKILL to {sorted(remaining)}")
+        signal_hdt(remaining, signal.SIGKILL)
+        remaining = wait_for_hdt_exit(2.0)
+
+    if remaining:
+        log(f"Unable to stop HDT processes: {sorted(remaining)}")
+        return False
+
+    # Let XWayland discard the old WPF windows before creating replacements.
+    deadline = time.monotonic() + 2.0
+    while time.monotonic() < deadline and (
+        title_exists(HDT_TITLE) or title_exists(OVERLAY_TITLE)
+    ):
+        time.sleep(POLL_SECONDS)
+    return True
+
+
+def launch_hdt() -> bool:
+    umu_run = shutil.which("umu-run")
+    if umu_run is None:
+        log("umu-run executable was not found")
+        return False
+    if not HDT_EXE.is_file():
+        log(f"HDT executable was not found: {HDT_EXE}")
+        return False
+    if not HDT_PRELAUNCH.is_file():
+        log(f"HDT compatibility guard was not found: {HDT_PRELAUNCH}")
+        return False
+
+    game_pids = sorted(exact_executable_pids(GAME_PROCESS), reverse=True)
+    if not game_pids:
+        log("Unable to copy runtime environment: Hearthstone is not running")
+        return False
+    game_environment = process_environment(game_pids[0])
+    proton_path = game_environment.get("PROTONPATH")
+    if not proton_path or not Path(proton_path).is_dir():
+        log("Unable to copy the active PROTONPATH from Hearthstone")
+        return False
+
+    try:
+        with LOG_PATH.open("a", encoding="utf-8") as output:
+            guard = subprocess.run(
+                [str(HDT_PRELAUNCH)],
+                stdin=subprocess.DEVNULL,
+                stdout=output,
+                stderr=subprocess.STDOUT,
+                check=False,
+            )
+            if guard.returncode != 0:
+                log(f"HDT compatibility guard failed with status {guard.returncode}")
+                return False
+
+            child_environment = os.environ.copy()
+            child_environment.update(
+                {
+                    key: value
+                    for key, value in game_environment.items()
+                    if key in RUNTIME_ENV_NAMES
+                    or key.startswith(RUNTIME_ENV_PREFIXES)
+                }
+            )
+            child_environment.update(
+                {
+                    "PROTONPATH": proton_path,
+                    "PROTON_VERB": "runinprefix",
+                    "STEAM_COMPAT_DATA_PATH": str(PREFIX_ROOT),
+                    "WINEPREFIX": str(PREFIX_ROOT),
+                }
+            )
+            child_environment.setdefault("GAMEID", "umu-default")
+            child_environment.setdefault("STORE", "")
+
+            log(
+                "Launching HDT directly in Hearthstone's active "
+                f"UMU/Proton prefix ({proton_path})"
+            )
+            subprocess.Popen(
+                [umu_run, str(HDT_EXE)],
+                stdin=subprocess.DEVNULL,
+                stdout=output,
+                stderr=subprocess.STDOUT,
+                cwd=HDT_EXE.parent,
+                env=child_environment,
+                start_new_session=True,
+            )
+    except OSError as error:
+        log(f"Unable to launch HDT through UMU: {error}")
+        return False
+    return True
+
+
+def wait_for_overlay() -> bool:
+    deadline = time.monotonic() + START_TIMEOUT_SECONDS
+    while time.monotonic() < deadline:
+        if title_exists(OVERLAY_TITLE):
+            # Reject a window that appears briefly and immediately crashes.
+            time.sleep(1.0)
+            return title_exists(OVERLAY_TITLE)
+        if not game_is_running():
+            log("Hearthstone exited while waiting for the overlay")
+            return False
+        time.sleep(POLL_SECONDS)
+    return False
+
+
+def main() -> int:
+    RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
+    with LOCK_PATH.open("w", encoding="utf-8") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            notify(
+                "HS Overlay уже перезапускается",
+                "Дождитесь уведомления о завершении.",
+            )
+            return 0
+
+        log("Restart requested from Rofi")
+        if not game_is_running():
+            log("Restart cancelled: Hearthstone is not running")
+            notify(
+                "HS Overlay не перезапущен",
+                "Hearthstone сейчас не запущен.",
+                "critical",
+            )
+            return 2
+
+        notify(
+            "Перезапуск HS Overlay",
+            "Hearthstone и текущий матч останутся запущены.",
+        )
+
+        if not stop_hdt():
+            notify(
+                "Не удалось остановить HDT",
+                f"Подробности: {LOG_PATH}",
+                "critical",
+            )
+            return 3
+
+        # The central safety invariant: never continue if the game disappeared.
+        if not game_is_running():
+            log("Restart cancelled after HDT shutdown: Hearthstone exited")
+            notify(
+                "HS Overlay не запущен",
+                "Hearthstone был закрыт во время перезапуска.",
+                "critical",
+            )
+            return 4
+
+        if not launch_hdt():
+            notify(
+                "Не удалось запустить HDT",
+                f"Подробности: {LOG_PATH}",
+                "critical",
+            )
+            return 5
+
+        if wait_for_overlay():
+            log("Overlay restart completed successfully")
+            notify(
+                "HS Overlay перезапущен",
+                "Overlay снова работает поверх текущего Hearthstone.",
+            )
+            return 0
+
+        tracker_state = "HDT запущен" if hdt_pids() else "HDT не запустился"
+        log(f"Overlay did not appear within {START_TIMEOUT_SECONDS:.0f}s; {tracker_state}")
+        notify(
+            "HS Overlay не появился",
+            f"{tracker_state}. Подробности: {LOG_PATH}",
+            "critical",
+        )
+        return 6
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

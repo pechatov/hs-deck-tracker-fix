@@ -1,0 +1,30 @@
+diff --git a/Hearthstone Deck Tracker/Windows/OverlayWindow.MouseOverDetection.cs b/Hearthstone Deck Tracker/Windows/OverlayWindow.MouseOverDetection.cs
+index 6a38a3f1..2d72a4b3 100644
+--- a/Hearthstone Deck Tracker/Windows/OverlayWindow.MouseOverDetection.cs	
++++ b/Hearthstone Deck Tracker/Windows/OverlayWindow.MouseOverDetection.cs	
+@@ -51,6 +51,13 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 		public int? _leaderboardHoveredEntityId = null;
+ 		private bool _mouseIsOverLeaderboardIcon = false;
+ 		private const int MouseLeaveEventDelay = 200;
++		private const string WineBattlegroundsClickthroughMarker = "HDT_WINE_BATTLEGROUNDS_CLICKTHROUGH_ZONE";
++		// Fixed WPF coordinates for the current DP-1 overlay. There are no interactive
++		// HDT controls in this part of the board. Keep it click-through independently
++		// of game-mode detection: while entering/leaving Battlegrounds or returning to
++		// its menu IsBattlegroundsMatch can briefly be false, and Wine can otherwise
++		// reactivate a stale full-window WPF hit target here.
++		private static readonly Rect WineBattlegroundsClickthroughRegion = new(250, 140, 1300, 620);
+ 
+ 		private Point CenterOfHand => new Point((float)Width * 0.5 - Height * 0.035, (float)Height * 0.95);
+ 
+@@ -500,6 +507,11 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 
+ 			var clickableMouseOver = behind ? NoMouseOver
+ 				: _clickableElements.Where(e => ElementContains(e, (Point)cursorPos, _scaleCache.Dict, _transformCache.Dict)).ToList();
++			if(WineBattlegroundsClickthroughRegion.Contains(cursorPos.Value))
++			{
++				clickableMouseOver.Clear();
++				GC.KeepAlive(WineBattlegroundsClickthroughMarker);
++			}
+ 			SetClickthrough(clickableMouseOver.Count == 0);
+ 
+ 			var hoverableMouseOver = behind ? NoMouseOver

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Hearthstone
+Comment=Hearthstone with Hearthstone Deck Tracker
+Icon=hearthstone-hand-drawn
+Exec=lutris lutris:rungameid/4
+StartupWMClass=hearthstone-hand-drawn
+Terminal=false
+NoDisplay=true
+Categories=Game;

@@ -1,0 +1,52 @@
+diff --git a/Hearthstone Deck Tracker/Utility/Overlay/OverlayOpacityMask.cs b/Hearthstone Deck Tracker/Utility/Overlay/OverlayOpacityMask.cs
+index 7e7d33f5..f5076949 100644
+--- a/Hearthstone Deck Tracker/Utility/Overlay/OverlayOpacityMask.cs	
++++ b/Hearthstone Deck Tracker/Utility/Overlay/OverlayOpacityMask.cs	
+@@ -8,6 +8,8 @@ namespace Hearthstone_Deck_Tracker.Utility.Overlay
+ {
+     public class OverlayOpacityMask : INotifyPropertyChanged
+     {
++		private const string WineOpacityMaskMarker = "HDT_WINE_OPACITY_MASK_DISABLED";
++
+         private DrawingBrush? _mask;
+         public DrawingBrush? Mask
+         {
+@@ -98,30 +100,14 @@ namespace Hearthstone_Deck_Tracker.Utility.Overlay
+ 
+         private void CreateOpacityMask()
+         {
+-	        if(_disabled)
+-		        return;
+-	        var fullAreaGeometry = new RectangleGeometry(new Rect(0, 0, 1, 1));
+-	        Geometry combinedGeometry = fullAreaGeometry;
+-
+-	        foreach (var regions in _maskedRegions.Values)
+-	        {
+-		        foreach (var region in regions)
+-		        {
+-			        var regionGeometry = new RectangleGeometry(region);
+-			        combinedGeometry = new CombinedGeometry(GeometryCombineMode.Exclude, combinedGeometry, regionGeometry);
+-		        }
+-	        }
+-
+-	        var geometryDrawing = new GeometryDrawing
+-	        {
+-		        Brush = Brushes.Black,
+-		        Geometry = combinedGeometry
+-	        };
+-
+-	        Mask = new DrawingBrush
+-	        {
+-		        Drawing = geometryDrawing,
+-	        };
++	        // Wine/XWayland renders every transparent hole in the window-level
++	        // WPF opacity mask as an opaque black rectangle. A low non-zero mask
++	        // alpha is not sufficient: it is multiplied by the window's 1/255
++	        // transparent background and quantized back to zero. This build is
++	        // Wine-specific, so disable only the dynamic window-level mask. HDT's
++	        // panels and card tooltips keep their own normal visibility behavior.
++	        GC.KeepAlive(WineOpacityMaskMarker);
++	        Mask = null;
+         }
+ 
+         // Property change handler for data binding or UI update
