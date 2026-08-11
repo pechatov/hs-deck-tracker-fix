@@ -1,0 +1,40 @@
+9b98f8dae979eb6e49ea1909d74119958210e2325111b1bb5a2ff134d9b5fbe3  ./PATCH-MANIFEST.txt
+cf6be9ec4f53c6269198262d7443087eca8380c3ff669db3cc091180009acc76  ./README.md
+60a45e58077759cbd54712142714ca23356b84ccb8282b9723474abf38701062  ./MATERIALS.md
+2f576a33231581e20b217ab9aa9f55c8cbd5b91c133c7e5ad9870ea7cd549ac6  ./artifacts/hdt-working-v1.55.3-recent-games.tar.zst
+3fc91f8e2b115dd772fdbcd33e52cbca63ec49c9f387f14a4dd462228134e7fd  ./artifacts/hdt-working-v1.55.3-recent-games.contents.sha256
+683ffac0865048df698bcaad4c7ffdfac03184f375c97ed7de69334a3cd0b8ea  ./artifacts/hdt-working-v1.55.3-pre-chat.tar.zst
+6822a00ecac75455d81efc03b50a39eb3248bc5b7b1087bdf757da6545eba1bb  ./artifacts/hdt-working-v1.55.3-pre-chat.contents.sha256
+4e11aa5139170c3f99c4de57a35764c2c2ead653d220ca4d1bb71d282b46ad13  ./assets/hearthstone-waybar.png
+a9422878f0afbb6174d6ff6158ae31673fedeefb633681cd411b9f68ceb87dcc  ./config/hdt-hearthstone-launcher.bat
+b22a6bf0763c3e97274d48acf4d47414c7f0b0a3888194460bb5b611f7cdf1e8  ./config/hearthstone-deck-tracker.yml
+16a5ae0b674a1eaa720787f56c5ba58b4ce4993212bcb2466e6e02225b6c78c1  ./config/hearthstone-plus-deck-tracker.yml
+8cc188a37f62ea89af9725575807aba99e248f0459ed0b892240777005c80bd9  ./config/hyprland-hdt.conf
+633c7a80d8c77e7023a69bd0d840065f3cdbbb75928ef635faad9448f5cd1214  ./config/wine-taskbar-icons.py
+ec0d5dcf17acf262da3cbc565b6b3f3cc31ec48de85de265abc9ceaea9e8d855  ./config/hearthstone.desktop
+bd43859e221fcb3350abbbd4644c8ab8dabfa08010125b8fd8c4a7e6182e8584  ./config/hearthstone-deck-tracker.desktop
+5c069dff7fcf17927b1411a7c2fbdcab158eb309b850ecf4ec0e80c5fe1b9ba1  ./config/restart-hs-overlay
+f99351ab66b7c83f238f8a7243b1cc04f5d3b49b4d86fc0d7e06fda53edafece  ./config/restart-hs-overlay.desktop
+982865fc24bc8f322b87ff23a5172eef078d7c7086af78ad559cf31ab95f93d7  ./hdt-prelaunch.py
+385010d9c6123319c72c17bf5067c709b6c13a84c803ebf258a3c981cd1fee1e  ./hdt-wine-functional.patch
+6986c85bd33971d91c997d2d67aebd3594dc9840475fea1a788401da31d7ed3d  ./hdt-wine-functional-v1.53.6.patch
+1c5492ed4b378dcef37acce6a1b952ea6f05ca8b5331648ce35f397f6d163bbb  ./hdt-wine-functional-v1.54.2.patch
+1c5492ed4b378dcef37acce6a1b952ea6f05ca8b5331648ce35f397f6d163bbb  ./hdt-wine-functional-v1.55.0.patch
+1c5492ed4b378dcef37acce6a1b952ea6f05ca8b5331648ce35f397f6d163bbb  ./hdt-wine-functional-v1.55.1.patch
+385010d9c6123319c72c17bf5067c709b6c13a84c803ebf258a3c981cd1fee1e  ./hdt-wine-functional-v1.55.3.patch
+7fc58393a88ab02ef63f6ae249ee893e646ca9fe3c0c179cc17935b02a8a4b50  ./local-clickthrough-zone.patch
+154983ed863b0cd04d4a98a292d75f048f930d383793e89de6e8b1249356e680  ./local-fixed-overlay-position.patch
+0f5963533e9262757bc3797644eeb222cccd175850a7082a8e30d3c33ffb7bdf  ./local-hover-preview.patch
+13403b5aa3b0283117602c73c57b9d2f67958aec58c0ea21e10fd8df17f91465  ./local-opacity-mask.patch
+b11f715d1bea15ea8015d0d4df8658cacfc00f7f42da99027cc1dc85e7a2e5c1  ./local-recent-games.patch
+89bed78a85d5ae8e1be20e44cdf59ba1d36a133b650fe26c4b29a4c91fa96d78  ./upstream-pr-4741.patch
+
+# Внешнее рабочее состояние на 2026-08-11; эти хэши закономерно изменятся
+# после принятого контролируемого обновления и не проверяются sha256sum -c:
+# 41e8df362b951d81a0c4b897f1e264a7030bfc4ad90098bfa8c5fe2e45bbcc72  installed Hearthstone Deck Tracker.exe
+# 41e8df362b951d81a0c4b897f1e264a7030bfc4ad90098bfa8c5fe2e45bbcc72  working-current-wine/Hearthstone Deck Tracker.exe
+# 982865fc24bc8f322b87ff23a5172eef078d7c7086af78ad559cf31ab95f93d7  active ~/.local/share/lutris/scripts/hdt-prelaunch.py
+# 5c069dff7fcf17927b1411a7c2fbdcab158eb309b850ecf4ec0e80c5fe1b9ba1  active ~/.local/bin/restart-hs-overlay
+# 633c7a80d8c77e7023a69bd0d840065f3cdbbb75928ef635faad9448f5cd1214  active ~/.config/waybar/scripts/wine-taskbar-icons.py
+# f99351ab66b7c83f238f8a7243b1cc04f5d3b49b4d86fc0d7e06fda53edafece  active restart-hs-overlay.desktop
+# e1e6203c5c4be1cedad76f8e20a4e77a8dc8d0747bf681f9d3feeeadb3d2df1f  hdt-before-bg-fix-20260710-1136.tar.zst

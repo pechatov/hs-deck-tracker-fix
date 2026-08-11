@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Hearthstone Deck Tracker
+Icon=hearthstone-deck-tracker
+Exec=/home/mike/.local/bin/restart-hs-overlay
+StartupWMClass=hearthstone-deck-tracker
+Terminal=false
+NoDisplay=true
+Categories=Utility;

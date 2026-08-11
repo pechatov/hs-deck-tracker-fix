@@ -1,0 +1,286 @@
+diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml
+index e9d7063c..93623173 100644
+--- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml	
++++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml	
+@@ -5,6 +5,7 @@
+              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+              xmlns:hearthstoneDeckTracker="clr-namespace:Hearthstone_Deck_Tracker"
+              xmlns:local="clr-namespace:Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session"
++             xmlns:battlegrounds="clr-namespace:Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds"
+              xmlns:lex="http://wpflocalizeextension.codeplex.com"
+              xmlns:composition="clr-namespace:Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Composition"
+              xmlns:tier7="clr-namespace:Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Tier7"
+@@ -331,6 +332,33 @@
+                             </ItemsPanelTemplate>
+                         </ItemsControl.ItemsPanel>
+                     </ItemsControl>
++                    <battlegrounds:OverlayButton
++                        x:Name="BtnShowMoreGames"
++                        Command="{Binding ToggleRecentGamesCommand}"
++                        Visibility="{Binding ShowMoreGamesButtonVisibility, FallbackValue=Collapsed}"
++                        Cursor="Hand"
++                        Height="29"
++                    >
++                        <battlegrounds:OverlayButton.Style>
++                            <Style TargetType="battlegrounds:OverlayButton">
++                                <Setter Property="Background" Value="#1C2022" />
++                                <Setter Property="BorderBrush" Value="#4A5256" />
++                                <Setter Property="BorderThickness" Value="0,1,0,0" />
++                                <Style.Triggers>
++                                    <Trigger Property="IsMouseOver" Value="True">
++                                        <Setter Property="Background" Value="#2E3235" />
++                                    </Trigger>
++                                </Style.Triggers>
++                            </Style>
++                        </battlegrounds:OverlayButton.Style>
++                        <hearthstoneDeckTracker:HearthstoneTextBlock
++                            Text="{Binding ShowMoreGamesButtonText}"
++                            FontSize="12"
++                            HorizontalAlignment="Center"
++                            VerticalAlignment="Center"
++                            Opacity=".8"
++                        />
++                    </battlegrounds:OverlayButton>
+                 </StackPanel>
+             </StackPanel>
+             <Border
+diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs
+index 79c07a66..d80e0d18 100644
+--- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs	
++++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs	
+@@ -5,9 +5,11 @@ using System.Linq;
+ using System.Threading;
+ using System.Threading.Tasks;
+ using System.Windows;
++using System.Windows.Input;
+ using HearthDb.Enums;
+ using HearthMirror;
+ using HearthMirror.Objects;
++using Hearthstone_Deck_Tracker.Commands;
+ using Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Composition;
+ using Hearthstone_Deck_Tracker.Enums.Hearthstone;
+ using Hearthstone_Deck_Tracker.Hearthstone;
+@@ -29,7 +31,13 @@ namespace Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session;
+ 
+ public class BattlegroundsSessionViewModel : ViewModel
+ {
++	internal const int SessionGamesLimit = 8;
++	internal const int RecentGamesLimit = 20;
++
+ 	private readonly BattlegroundsDb _db = BattlegroundsDbSingleton.Instance;
++	private List<GameItem> _sessionGames = new();
++	private List<GameItem> _recentGames = new();
++	private bool _showRecentGames;
+ 
+ 	public ObservableCollection<Race> AvailableMinionTypes { get; } = new();
+ 	public ObservableCollection<Race> BannedMinionTypes { get; } = new();
+@@ -339,29 +347,65 @@ public class BattlegroundsSessionViewModel : ViewModel
+ 			.ToList();
+ 		DeleteOldGames(sortedGames);
+ 
+-		var sessionGames = GetSessionGames(sortedGames);
+-		var firstGame = sessionGames.FirstOrDefault();
++		_sessionGames = GetSessionGames(sortedGames);
++		_recentGames = GetMostRecentGames(sortedGames, RecentGamesLimit);
++		var firstGame = _sessionGames.FirstOrDefault();
+ 
+-		SessionGames.Clear();
+-		sessionGames
+-			.GetRange(Math.Max(sessionGames.Count - 8, 0), Math.Min(8, sessionGames.Count))
++		var defaultSessionGamesCount = Math.Min(_sessionGames.Count, SessionGamesLimit);
++		ShowMoreGamesButtonVisibility = _recentGames.Count > defaultSessionGamesCount
++			? Visibility.Visible
++			: Visibility.Collapsed;
++		if(ShowMoreGamesButtonVisibility != Visibility.Visible)
++			_showRecentGames = false;
++
++		UpdateDisplayedGames();
++
++		Core.Windows.BattlegroundsSessionWindow.UpdateBattlegroundsSessionLayoutHeight();
++
++		return firstGame;
++	}
++
++	internal static List<GameItem> GetMostRecentGames(List<GameItem> sortedGames, int limit) =>
++		sortedGames
++			.Skip(Math.Max(sortedGames.Count - limit, 0))
+ 			.OrderByDescending(g => g.StartTime)
+-			.ToList()
+-			.ForEach(AddOrUpdateGame);
++			.ToList();
++
++	private void UpdateDisplayedGames()
++	{
++		var games = _showRecentGames
++			? _recentGames
++			: GetMostRecentGames(_sessionGames, SessionGamesLimit);
+ 
+-		GridHeaderVisibility = sessionGames.Count > 0
++		SessionGames.Clear();
++		games.ForEach(AddOrUpdateGame);
++
++		GridHeaderVisibility = games.Count > 0
+ 			? Visibility.Visible
+ 			: Visibility.Collapsed;
+ 
+-		GamesEmptyStateVisibility = sessionGames.Count == 0
++		GamesEmptyStateVisibility = games.Count == 0
+ 			? Visibility.Visible
+ 			: Visibility.Collapsed;
+ 
+-		Core.Windows.BattlegroundsSessionWindow.UpdateBattlegroundsSessionLayoutHeight();
++		OnPropertyChanged(nameof(ShowMoreGamesButtonText));
++	}
+ 
+-		return firstGame;
++	private void ToggleRecentGames()
++	{
++		_showRecentGames = !_showRecentGames;
++		UpdateDisplayedGames();
++		Core.Windows.BattlegroundsSessionWindow.UpdateBattlegroundsSessionLayoutHeight();
+ 	}
+ 
++	private ICommand? _toggleRecentGamesCommand;
++	public ICommand ToggleRecentGamesCommand =>
++		_toggleRecentGamesCommand ??= new Command(ToggleRecentGames);
++
++	public string ShowMoreGamesButtonText => _showRecentGames
++		? "Show session games"
++		: "Show more games";
++
+ 	private List<GameItem> GetSessionGames(List<GameItem> sortedGames)
+ 	{
+ 		DateTime? sessionStartTime = null;
+@@ -408,12 +452,28 @@ public class BattlegroundsSessionViewModel : ViewModel
+ 
+ 	private void DeleteOldGames(List<GameItem> sortedGames)
+ 	{
+-		sortedGames.ForEach(g =>
++		var gamesToDelete = GetExpiredGames(sortedGames, DateTime.Now);
++		gamesToDelete.ForEach(g =>
+ 		{
+-			var ts = DateTime.Now - DateTime.Parse(g.StartTime);
+-			if(g.StartTime != null && ts.TotalDays >= 7)
+-				Instance.RemoveGame(g.StartTime);
++			if(g.StartTime != null)
++				Instance.RemoveGame(g.StartTime, false);
+ 		});
++		if(gamesToDelete.Count > 0)
++		{
++			sortedGames.RemoveAll(gamesToDelete.Contains);
++			BattlegroundsLastGames.Save();
++		}
++	}
++
++	internal static List<GameItem> GetExpiredGames(List<GameItem> sortedGames, DateTime now)
++	{
++		var numberEligibleForDeletion = Math.Max(sortedGames.Count - RecentGamesLimit, 0);
++		return sortedGames
++			.Take(numberEligibleForDeletion)
++			.Where(g => g.StartTime != null
++				&& DateTime.TryParse(g.StartTime, out var startTime)
++				&& (now - startTime).TotalDays >= 7)
++			.ToList();
+ 	}
+ 
+ 	private void AddOrUpdateGame(GameItem game)
+@@ -600,6 +660,17 @@ public class BattlegroundsSessionViewModel : ViewModel
+ 		}
+ 	}
+ 
++	private Visibility _showMoreGamesButtonVisibility;
++	public Visibility ShowMoreGamesButtonVisibility
++	{
++		get => _showMoreGamesButtonVisibility;
++		set
++		{
++			_showMoreGamesButtonVisibility = value;
++			OnPropertyChanged();
++		}
++	}
++
+ 	private Visibility _bgStartCurrentMMRSectionVisibility;
+ 	public Visibility BgStartCurrentMMRSectionVisibility
+ 	{
+diff --git a/Hearthstone Deck Tracker/Windows/OverlayWindow.Initialize.cs b/Hearthstone Deck Tracker/Windows/OverlayWindow.Initialize.cs
+index 16d6e0dd..c8263eba 100644
+--- a/Hearthstone Deck Tracker/Windows/OverlayWindow.Initialize.cs	
++++ b/Hearthstone Deck Tracker/Windows/OverlayWindow.Initialize.cs	
+@@ -150,6 +150,7 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 			_clickableElements.Add(BattlegroundsSession.BtnOptions);
+ 			_clickableElements.Add(BattlegroundsSession.BattlegroundsSessionPanelTopGroup);
+ 			_clickableElements.Add(BattlegroundsSession.BgLatestGamesSectionHeader);
++			_clickableElements.Add(BattlegroundsSession.BtnShowMoreGames);
+ 		}
+ 	}
+ }
+diff --git a/HDTTests/Battlegrounds/BattlegroundsSessionRecentGamesTest.cs b/HDTTests/Battlegrounds/BattlegroundsSessionRecentGamesTest.cs
+new file mode 100644
+index 00000000..21af146b
+--- /dev/null
++++ b/HDTTests/Battlegrounds/BattlegroundsSessionRecentGamesTest.cs
+@@ -0,0 +1,64 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session;
++using Microsoft.VisualStudio.TestTools.UnitTesting;
++using static Hearthstone_Deck_Tracker.Utility.Battlegrounds.BattlegroundsLastGames;
++
++namespace HDTTests.Battlegrounds
++{
++	[TestClass]
++	public class BattlegroundsSessionRecentGamesTest
++	{
++		[TestMethod]
++		public void GetMostRecentGames_ReturnsNewestTwentyInDisplayOrder()
++		{
++			var games = CreateGames(25, DateTime.Today.AddDays(-25));
++
++			var recentGames = BattlegroundsSessionViewModel.GetMostRecentGames(
++				games,
++				BattlegroundsSessionViewModel.RecentGamesLimit
++			);
++
++			Assert.AreEqual(20, recentGames.Count);
++			CollectionAssert.AreEqual(
++				games.Skip(5).Reverse().Select(g => g.StartTime).ToList(),
++				recentGames.Select(g => g.StartTime).ToList()
++			);
++		}
++
++		[TestMethod]
++		public void GetExpiredGames_AlwaysRetainsNewestTwenty()
++		{
++			var now = DateTime.Today;
++			var games = CreateGames(25, now.AddDays(-30));
++
++			var expiredGames = BattlegroundsSessionViewModel.GetExpiredGames(games, now);
++
++			Assert.AreEqual(5, expiredGames.Count);
++			CollectionAssert.AreEqual(
++				games.Take(5).Select(g => g.StartTime).ToList(),
++				expiredGames.Select(g => g.StartTime).ToList()
++			);
++		}
++
++		[TestMethod]
++		public void GetExpiredGames_DoesNotDeleteRecentGamesBeyondTwenty()
++		{
++			var now = DateTime.Today;
++			var games = CreateGames(25, now.AddDays(-1));
++
++			var expiredGames = BattlegroundsSessionViewModel.GetExpiredGames(games, now);
++
++			Assert.AreEqual(0, expiredGames.Count);
++		}
++
++		private static List<GameItem> CreateGames(int count, DateTime firstGameStart) =>
++			Enumerable.Range(0, count)
++				.Select(index => new GameItem
++				{
++					StartTime = firstGameStart.AddHours(index).ToString("O")
++				})
++				.ToList();
++	}
++}

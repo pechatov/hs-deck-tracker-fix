@@ -1,0 +1,189 @@
+Hearthstone Deck Tracker Wine overlay fixes (updated 2026-08-11)
+
+Installed HDT version: 1.55.3.7390
+Patched source base: upstream v1.55.3 commit
+  9e92f445f22d04f02c179c5cf6060f220dfe8929
+Installed executable SHA-256:
+  41e8df362b951d81a0c4b897f1e264a7030bfc4ad90098bfa8c5fe2e45bbcc72
+
+Battlegrounds data compatibility update: after a Hearthstone update, v1.53.6
+HearthMirror returned an empty MatchInfo. BobsBuddyInvoker consequently failed
+with System.ArgumentException: Player, and both combat probabilities and the
+spell-damage/blood-gem counters lost their input. The installation now uses the
+complete official v1.55.3 dependency set plus a custom exe built from the exact
+same tag. Do not mix individual DLLs between releases.
+
+Official v1.55.3 dependency SHA-256:
+  HearthMirror.dll
+    3cc1180b89582127fe737d0a8c6e03f13d460437a43511a6fc382bc958f31d1d
+  HearthDb.dll
+    a4d7014167f88ff210d007c11d6f36addda1516dbd615b5f4b37d4ec7b3399b7
+  BobsBuddy.dll
+    6f47528531d81761a99ce4d7de357d66f98e883d40bbb0799cc9ed7fc0a8a01f
+  BobsBuddy.Common.dll
+    16eada6e087370596016e5c7994f6a97d7a757d8c293a9febfcf51e99be6646c
+  HSReplay.dll
+    51e953fd2ad929bf3e32517846cf08e934430e5fbb29de03ce733ef3d5599de3
+  untapped-scry-dotnet.dll
+    20b30d2e75de8ff15544b98d819405055a1c76d3efbcb60278a15bf0eec909ad
+
+WPF release-version requirement: the upstream source file says 1.55.3, but the
+official release executable and its compiled pack URIs use 1.55.3.7390. The
+custom build must temporarily set both AssemblyVersion and FileVersion to the
+full value. A shortened version fails before creating its overlay with a
+FileNotFoundException for the mismatched HearthstoneDeckTracker assembly.
+
+Wine button fix: upstream HearthSim/Hearthstone-Deck-Tracker PR #4741,
+commit 7b32e0c164b5c751a01a61b8d664320ff4533768.
+
+Battlegrounds recent-games history: Latest Games keeps the compact current-
+session view by default and adds a Wine-compatible Show more games control for
+the latest 20 games in the selected mode. Every expanded row reuses
+BattlegroundsGameView, including the final-board hover preview. Seven-day
+cleanup only removes games beyond the newest 20. The button is explicitly
+registered as an overlay clickable element. Three regression tests cover
+ordering, minimum retention, and cleanup of excess recent records.
+
+Wine hover/black-rectangle fix: CardTooltip never creates zero-scale or
+zero-opacity visuals and no longer relies on show/hide/fade storyboards. Wine
+therefore cannot leave the tooltip dirty rectangle opaque black. Card previews
+remain enabled and appear immediately. Binary marker:
+  HDT_WINE_TOOLTIP_NO_ZERO_STATE
+The build requires System.Resources.Extensions.dll and its four transitive
+runtime DLLs; the pre-launch guard validates all five files.
+
+Wine hover/Discover black-card fix: the Wine build no longer assigns the
+window-level OverlayOpacityMask above Hearthstone's enlarged card or
+Discover/Choose One options. A first alpha-1/255 attempt still rounded to zero
+after composition with the alpha-1/255 window background. Returning Mask=null
+removes the incompatible WPF layer while retaining normal HDT panel visibility.
+Binary marker:
+  HDT_WINE_OPACITY_MASK_DISABLED
+
+Battlegrounds board click-through fix: a fixed WPF/Win32 rectangle
+250,140 1300x620 covering the user-reported center-left dead zone always
+discards accidental overlay hit-test matches before SetClickthrough. The rule
+is intentionally independent of IsBattlegroundsMatch, because that flag becomes
+false during Battlegrounds menu and scene transitions. This prevents Wine's
+fullscreen WPF overlay from replacing the Hearthstone cursor and swallowing
+board clicks while keeping the left session panel, top Bob's Buddy, and right
+Guides/Minions interactive.
+Binary marker:
+  HDT_WINE_BATTLEGROUNDS_CLICKTHROUGH_ZONE
+
+Battle.net chat experiments were fully rolled back on 2026-08-11. Do not add
+a broad lower-center click-through rectangle, hover/click focus-return logic,
+an X11 RECORD listener, no_follow_mouse, or cursor:no_warps: together they
+degraded the main overlay without making chat input reliable.
+
+Battlegrounds minion preview placement: AnimatedCardList explicitly sets
+CardTooltipPlacement=Left for the right-side minion panel, preventing previews
+from being positioned outside the screen under Wine.
+
+Fixed overlay geometry: OverlayWindow ignores Wine's transient client bounds
+during minimize/restore and always uses the DP-1 Win32/X11 rectangle
+3453,62 3412x1363. With monitor scale 1.25 this maps to the stable Hyprland
+game area near 11,50 2730x1091. Binary marker:
+  HDT_WINE_FIXED_OVERLAY_2730X1091
+
+External fullscreen/resize guard: Hyprland rules reject application fullscreen
+and maximize requests, while wine-taskbar-icons.py checks the actual compositor
+state once per second. It clears fullscreen, restores workspaces and floating
+state, and reapplies the verified X11 rectangles 3453,62 3412x1363 for
+HearthstoneOverlay and 3612,72 1200x675 for the HDT main window. Super+F is a
+guarded no-op for Hearthstone/HDT and remains normal for all other windows.
+
+Waybar icons: UMU/Proton reports Hearthstone, HDT, and helper windows as the
+same steam_app_default class. The login watcher assigns hearthstone-hand-drawn
+and hearthstone-deck-tracker to the two exact application titles and marks the
+empty 160x20 Wine helper SKIP_TASKBAR. Hearthstone uses the user-selected
+Icons8 Color Hand Drawn asset under its unique class/icon name; HDT uses its
+native spiral. Matching desktop entries and hicolor icons are installed outside
+the Wine prefix, so ordinary HDT updates do not remove this fix.
+HearthstoneOverlay keeps its original class but is explicitly marked
+SKIP_TASKBAR, preventing a duplicate third Wine task next to the two real apps.
+
+Battle.net workspace routing: the window guard recognizes only the main
+Battle.net launcher, follows the most recently active Lutris window's workspace,
+and falls back to workspace 3 when Lutris is unavailable. Hearthstone remains
+independently pinned to workspace 5. A static Hyprland rule supplies immediate
+fallback placement before the first one-second guard cycle.
+
+HDT lifecycle: once the guard has actually observed the live Hearthstone
+process, its disappearance starts a six-second grace period. Stale XWayland
+windows and zombie processes are ignored. The game can return and cancel the
+pending action. Otherwise the HDT main window receives
+WM_CLOSE, which performs the normal clean Core.Shutdown path with the current
+CloseToTray=false setting. SIGTERM is used only after an additional 15-second
+clean-shutdown timeout. Standalone HDT launches are never closed automatically.
+
+Rofi recovery action: ~/.local/share/applications/restart-hs-overlay.desktop
+exposes "Перезапустить HS Overlay" in the Super+A drun launcher. Its helper
+~/.local/bin/restart-hs-overlay cleanly closes only HDT, falls back to signalling
+only the live Windows process whose argv[0] is exactly Hearthstone Deck
+Tracker.exe, runs the compatibility guard, relaunches HDT directly through
+umu-run in the live Hearthstone process's exact Proton environment and fixed
+shared prefix, and waits for a stable HearthstoneOverlay window. Lutris/UMU
+wrapper arguments cannot match. It refuses to run without an active non-zombie
+Hearthstone or a valid live PROTONPATH and never kills Hearthstone, wineserver,
+or shared Proton processes. A non-blocking lock prevents concurrent restarts;
+results are shown through desktop notifications and logged to $XDG_RUNTIME_DIR.
+
+Lutris library: only record 4, "Hearthstone + Deck Tracker", remains active.
+Its former Battle.net parent dependency was removed from both pga.db and YAML.
+The standalone Battle.net, Hearthstone, and HDT records/configs were removed
+without touching /home/mike/Games/hs/battlenet. The standalone HDT YAML kept in
+this project is historical recovery material, not an active shortcut.
+
+Lutris configuration root: after Lutris 0.5.22-2, the HDT prelaunch guard lives
+under ~/.local/share/lutris/scripts. This keeps the database, games/*.yml and
+guard under the same root. Do not recreate ~/.config/lutris only for scripts:
+its existence makes Lutris select that directory as a complete legacy config
+root and causes "This game has no executable set" when games/*.yml are absent.
+
+Update policy:
+  Automatic HDT updates are pinned. hdt-prelaunch.py checks every installed
+  executable before launch. A build is accepted only when it contains
+  OverlayButton, the fixed-geometry, tooltip-zero-state, opacity-mask and
+  Battlegrounds click-through markers, all tooltip runtime files, a supported
+  transparency layout, and matches the Scry DLL architecture. Any other update is backed up
+  under rejected-updates/ and the complete working installation is restored
+  atomically from:
+    working-current-wine/
+  Every accepted release then becomes the new working-current-wine snapshot,
+  so rollback never drops farther back than the last verified version.
+
+Commands:
+  ~/.local/share/lutris/scripts/hdt-prelaunch.py --status
+  ~/.local/share/lutris/scripts/hdt-prelaunch.py --enable-updates
+  ~/.local/share/lutris/scripts/hdt-prelaunch.py --disable-updates
+
+--enable-updates opens a one-launch update window. If no update is installed,
+the next launch pins HDT again. A compatible update is patched, promoted to the
+snapshot, and pinned; an incompatible update is backed up and rolled back.
+
+Backups in this directory:
+  908c75b22f60d8aec4ed347b3007c11ac34f2f584a11f5c9bae63f8d07160037
+    Official v1.53.6.7356 executable before the transparency patch.
+  46cc976f739cae54454c4310ee469049c624d09085b3bb13daa5c5520552c42e
+    Official executable with the Wine transparency patch.
+  4db0429571d9a5315ded81763e23d871b3cfa3236f43e2a32d5983b653f2eb9e
+    Custom PR #4741 plus hover and preview-position fixes, before transparency patch.
+
+Full pre-v1.54.2 installation backup:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1542-upgrade-20260802-201029
+
+Full pre-v1.55.0 installation backup:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1550-upgrade-20260804-2145
+
+Full pre-v1.55.1 installation backup:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1551-upgrade-20260805-152003
+
+Full pre-v1.55.3 installation backup:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1553-upgrade-20260810-114440
+
+Current restored v1.55.3 baseline from before all chat experiments:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-chat-clickthrough-20260810-173111
+
+Full snapshot before the recent-games feature was installed:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-recent-games-20260811-140706
