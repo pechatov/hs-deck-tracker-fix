@@ -1,5 +1,5 @@
 561688aef1443e800895ae48e9ee5a627162be438097e3fda55d109552010516  ./PATCH-MANIFEST.txt
-bbbe669cef42b537d6ad65051a0b9ee0cda7a7b336fcf34463c632ac3a413cdb  ./README.md
+04cffa7af2b5b3c81f128b5e998b73b0ed52ce43c111c8ce4b29e3ebe4acb6a6  ./README.md
 5751160c1cf916a997e05bfd419766a7d0c4b8949001dc9b15c021a94e4839eb  ./MATERIALS.md
 73f0f73336341202cd81e7845a9f7ab8f615e2eeaa1bff65d4e27eee49439765  ./artifacts/hdt-working-v1.56.1-recent-games.tar.zst
 cccc7f0a5ecd2d3cf558dfe0b7dbf641be59335a6b894d6bb496dc240fd069a7  ./artifacts/hdt-working-v1.56.1-recent-games.contents.sha256
@@ -15,7 +15,7 @@ b22a6bf0763c3e97274d48acf4d47414c7f0b0a3888194460bb5b611f7cdf1e8  ./config/heart
 16a5ae0b674a1eaa720787f56c5ba58b4ce4993212bcb2466e6e02225b6c78c1  ./config/hearthstone-plus-deck-tracker.yml
 75108eb52aeafb504ed550f80373b2155f104a493e47c382e492c4bc71f76852  ./config/nikki-hdt-proxy-domains.list
 8cc188a37f62ea89af9725575807aba99e248f0459ed0b892240777005c80bd9  ./config/hyprland-hdt.conf
-ccc02632006a3ba5d68cb7227b95fec7d537af08a1d1970130254fd706554db7  ./config/wine-taskbar-icons.py
+307a07fd6a3ff2dd9ee3a2d607b4076e7742c857a6ff217c97ce07d0664710b1  ./config/wine-taskbar-icons.py
 ec0d5dcf17acf262da3cbc565b6b3f3cc31ec48de85de265abc9ceaea9e8d855  ./config/hearthstone.desktop
 bd43859e221fcb3350abbbd4644c8ab8dabfa08010125b8fd8c4a7e6182e8584  ./config/hearthstone-deck-tracker.desktop
 080f5d2e8344dc4fb9917bcf09af11045d08b45127e23b8862dba29c2c8a9605  ./config/restart-hs-overlay
@@ -42,6 +42,6 @@ b11f715d1bea15ea8015d0d4df8658cacfc00f7f42da99027cc1dc85e7a2e5c1  ./local-recent
 # 1dd610ac626a621d629d775bea21e3df08e89381478d16127b4d234db18bf7b9  working-current-wine/Hearthstone Deck Tracker.exe
 # 2bb41d79d16ea8a27d362a9221981bd2bcc8b190e0b1b92784389b4364ce29f6  active ~/.local/share/lutris/scripts/hdt-prelaunch.py
 # 080f5d2e8344dc4fb9917bcf09af11045d08b45127e23b8862dba29c2c8a9605  active ~/.local/bin/restart-hs-overlay
-# ccc02632006a3ba5d68cb7227b95fec7d537af08a1d1970130254fd706554db7  active ~/.config/waybar/scripts/wine-taskbar-icons.py
+# 307a07fd6a3ff2dd9ee3a2d607b4076e7742c857a6ff217c97ce07d0664710b1  active ~/.config/waybar/scripts/wine-taskbar-icons.py
 # f99351ab66b7c83f238f8a7243b1cc04f5d3b49b4d86fc0d7e06fda53edafece  active restart-hs-overlay.desktop
 # e1e6203c5c4be1cedad76f8e20a4e77a8dc8d0747bf681f9d3feeeadb3d2df1f  hdt-before-bg-fix-20260710-1136.tar.zst

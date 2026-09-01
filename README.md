@@ -80,7 +80,7 @@ automatic updates: pinned by Wine compatibility guard
 | `config/hdt-hearthstone-launcher.bat` | Совместный launcher Battle.net + HDT |
 | `config/nikki-hdt-proxy-domains.list` | Доменные суффиксы сервисов HDT, которые Nikki должен направлять через `PROXY` |
 | `config/hyprland-hdt.conf` | Справочная копия только относящихся к HDT правил Hyprland |
-| `config/wine-taskbar-icons.py` | Резервная копия active class/icon, geometry, routing и lifecycle guard |
+| `config/wine-taskbar-icons.py` | Резервная копия active class/icon, geometry, routing, chat-focus и lifecycle guard |
 | `config/hearthstone.desktop` | Desktop entry игры с постоянным `StartupWMClass` |
 | `config/hearthstone-deck-tracker.desktop` | Desktop entry HDT с постоянным `StartupWMClass` |
 | `config/restart-hs-overlay` | Безопасный перезапуск только HDT/overlay во время матча |
@@ -219,9 +219,29 @@ Desktop entries:
 
 В `Windows/OverlayWindow.MouseOverDetection.cs` добавлена принудительная WPF/Win32 click-through-область `Rect(250, 140, 1300, 620)`. Она покрывает всю отмеченную центрально-левую часть при текущей фиксированной геометрии DP-1. Перед вызовом `SetClickthrough` случайные clickable-hit в этой зоне отбрасываются. Область действует постоянно, а не только при `_game.IsBattlegroundsMatch`: при входе в Battlegrounds, выходе в его меню и переходах между сценами этот флаг кратковременно становится `false`, из-за чего прежний фикс иногда отключался. Левая панель статистики находится левее, Bob's Buddy выше, правая панель далеко правее, поэтому их интерактивность сохраняется. Бинарный маркер: `HDT_WINE_BATTLEGROUNDS_CLICKTHROUGH_ZONE`.
 
-Попытки отдельно исправить внутриигровой чат Battle.net 10–11 августа полностью откачены: широкая нижняя click-through-зона, возврат фокуса, X11 RECORD-listener, `no_follow_mouse` и `cursor:no_warps` ухудшали работу основного overlay, но не обеспечивали стабильный ввод. Их нельзя переносить в будущие сборки.
+Попытки отдельно исправить внутриигровой чат Battle.net 10–11 августа полностью откачены: широкая нижняя click-through-зона, возврат фокуса, X11 RECORD-listener, `no_follow_mouse` и `cursor:no_warps` ухудшали работу основного overlay, но не обеспечивали стабильный ввод. Их нельзя переносить в будущие сборки. Рабочее решение для чата реализовано 1 сентября 2026 года на другом уровне — см. раздел 6a.
 
 Исправление хранится в `local-clickthrough-zone.patch` и включено в общий `hdt-wine-functional.patch`. Как и фиксированная геометрия, координаты привязаны к текущему monitor layout и должны быть пересчитаны при смене масштаба или разрешения.
+
+### 6a. Ввод в чат Battle.net не работал при запущенном overlay
+
+Симптом: чат читался, но набор текста не работал. Причина установлена по слоям:
+
+- в prefix задано `UseTakeFocus=N`, поэтому Wine публикует все окна с `WM_HINTS Input=True` и без `WM_TAKE_FOCUS`, игнорируя `WS_EX_NOACTIVATE` overlay (ICCCM-модель «Passive»);
+- при клике по полю чата сам клик честно проходит в игру через пустой X11 input-shape overlay, но hit-test Hyprland для XWayland-окон работает по прямоугольнику окна, а не по input-region, поэтому компоузитор «фокусирует» именно overlay;
+- для окна с `Input=True` XWM Hyprland вызывает `xcb_set_input_focus`, X-клавиатура уходит на overlay, и набранный текст исчезает.
+
+Исправление: `wine-taskbar-icons.py` каждый цикл принудительно ставит окну `HearthstoneOverlay` ICCCM-модель «No Input» (`WM_HINTS` с флагом `InputHint` и `input=0`, python-xlib, остальные поля hints сохраняются). Для такого окна XWM Hyprland (проверено по исходникам v0.56.2, `CXWM::focusWindow`) не переносит X input focus — клавиатура остаётся у Hearthstone, при этом:
+
+- компоузиторный фокус overlay сохраняется, поэтому `restackToTop()` продолжает поднимать его в X-стеке — клики по панелям HDT работают (именно отсутствие restack сломало кнопки при экспериментах с `no_focus`, который исключает окно из hit-test целиком);
+- мышь не затрагивается вовсе: маршрутизация кликов по-прежнему решается X-сервером по input-shape;
+- Wine не борется с внешним значением (обработчик PropertyNotify для WM_HINTS принимает его как своё) и перезаписывает его только при show/hide, minimize/restore и смене иконки — ежесекундное переутверждение guard закрывает эти окна;
+- украсть X-фокус изнутри Wine overlay не может: `can_activate_window()` отвергает `WS_EX_NOACTIVATE`;
+- если overlay уже держал X-фокус (например, был сфокусирован до старта guard), guard один раз возвращает фокус окну `Hearthstone`.
+
+Исправление полностью внешнее: exe HDT, патчи, правила Hyprland и snapshot не изменялись. Откат — убрать вызов `enforce_overlay_no_input_hint()` из главного цикла guard и перезапустить его. Первое применение видно в `$XDG_RUNTIME_DIR/hdt-autoclose.log` строкой `forced WM_HINTS input=False (chat focus fix)`.
+
+Нельзя «улучшать» это решение правилом Hyprland `no_focus`, `no_input`, `no_follow_mouse` или `cursor:no_warps` — все эти варианты проверены 10–11 августа и ломают кнопки HDT либо центральные клики. Нельзя также включать `UseTakeFocus=Y` для всего prefix: это меняет модель фокуса всех окон Wine, включая Battle.net.
 
 ### 7. Превью карты уходило за правый край экрана
 
@@ -278,12 +298,13 @@ done < config/nikki-hdt-proxy-domains.list
 
 UMU/Proton назначал игре, HDT и их служебным XWayland-окнам один `WM_CLASS`: `steam_app_default`. Модуль `wlr/taskbar` подбирает иконку по этому значению и не может различить два приложения, поэтому показывал fallback со знаком вопроса.
 
-Активный `wine-taskbar-icons.py` выполняет пять точечных действий:
+Активный `wine-taskbar-icons.py` выполняет шесть точечных действий:
 
 - окну с точным заголовком `Hearthstone` назначает класс `hearthstone-hand-drawn`;
 - окну с точным заголовком `Hearthstone Deck Tracker` назначает класс `hearthstone-deck-tracker`;
 - пустому служебному Wine-окну физического размера `160×20` выставляет `_NET_WM_STATE_SKIP_TASKBAR`.
-- прозрачному `HearthstoneOverlay` также выставляет `_NET_WM_STATE_SKIP_TASKBAR`, чтобы оно не создавало третью кнопку рядом с игрой и HDT.
+- прозрачному `HearthstoneOverlay` также выставляет `_NET_WM_STATE_SKIP_TASKBAR`, чтобы оно не создавало третью кнопку рядом с игрой и HDT;
+- тому же `HearthstoneOverlay` ежесекундно переутверждает `WM_HINTS input=False`, чтобы X-клавиатура оставалась у Hearthstone и работал ввод в чат Battle.net (раздел 6a).
 - пока workspace 5 виден, делает `UnMapped` все XWayland-окна на неактивных workspace того же монитора, а при уходе с игрового workspace возвращает их.
 
 `HearthstoneOverlay`, `Session Recap`, `Hidden Window` и остальные окна HDT скрипт не переименовывает. Это важно: правило прозрачности overlay по-прежнему сопоставляется с `steam_app_default`.
@@ -672,6 +693,14 @@ ssh router '/etc/nikki/scripts/custom-proxy-domain.sh list_proxy' | \
 2. Если marker отсутствует, обычный pre-launch должен вернуть рабочий snapshot.
 3. Если monitor scale или разрешение менялись, пересчитать `WineBattlegroundsClickthroughRegion` в WPF/Win32-координатах и пересобрать exe.
 4. Не расширять зону на левую session-панель, верхний Bob's Buddy или правые Guides/Minions: эти элементы должны оставаться интерактивными.
+
+### Если снова не печатается в чат Battle.net
+
+1. Проверить guard: `pgrep -af wine-taskbar-icons.py` — процесс должен быть запущен.
+2. Проверить хинт: `xprop -id $(xdotool search --name '^HearthstoneOverlay$' | head -1) WM_HINTS` — строка `Client accepts input or input focus` должна быть `False`. Если `True` дольше пары секунд, python-xlib недоступен интерпретатору guard или guard устарел — сверить с `config/wine-taskbar-icons.py`.
+3. Найти в `$XDG_RUNTIME_DIR/hdt-autoclose.log` строку `forced WM_HINTS input=False (chat focus fix)` для текущего окна overlay.
+4. Один раз кликнуть по полю ввода чата (клик должен попасть в игру, а не в панель HDT) и набрать текст.
+5. Не решать проблему правилами `no_focus`/`no_input`/`no_follow_mouse` или `UseTakeFocus=Y` — см. раздел 6a.
 
 ### Если preview снова справа или hover тормозит
 

@@ -19,6 +19,13 @@ import sys
 import time
 from pathlib import Path
 
+try:
+    from Xlib import X as _X
+    from Xlib import Xutil as _Xutil
+    from Xlib import display as _xdisplay
+except ImportError:
+    _X = None
+
 
 WINDOWS = {
     "^Hearthstone$": "hearthstone-hand-drawn",
@@ -152,6 +159,113 @@ def hide_overlay_from_taskbar() -> None:
         title = run("xdotool", "getwindowname", window_id)
         if title.returncode == 0 and title.stdout.strip() == "HearthstoneOverlay":
             add_skip_taskbar(window_id)
+
+
+_x_display = None
+_overlay_hint_applied: set[int] = set()
+
+
+def _get_x_display():
+    global _x_display
+    if _X is None:
+        return None
+    if _x_display is None:
+        try:
+            _x_display = _xdisplay.Display()
+        except Exception:
+            _x_display = None
+    return _x_display
+
+
+def _drop_x_display() -> None:
+    global _x_display
+    if _x_display is not None:
+        try:
+            _x_display.close()
+        except Exception:
+            pass
+    _x_display = None
+
+
+def _find_x11_windows_by_exact_title(pattern: str, title: str) -> list[int]:
+    result = run("xdotool", "search", "--name", pattern)
+    if result.returncode != 0:
+        return []
+    matches = []
+    for window_id in result.stdout.split():
+        name = run("xdotool", "getwindowname", window_id)
+        if name.returncode == 0 and name.stdout.strip() == title:
+            matches.append(int(window_id))
+    return matches
+
+
+def enforce_overlay_no_input_hint() -> None:
+    """Keep the X11 keyboard away from the transparent overlay.
+
+    Wine publishes HearthstoneOverlay with WM_HINTS input=True even though the
+    window sets WS_EX_NOACTIVATE. On click Hyprland's XWM then moves the X
+    input focus to the overlay, which silently eats Battle.net chat typing
+    while the click itself still reaches Hearthstone through the empty input
+    shape. Forcing the ICCCM "No Input" model (InputHint flag set, input=0)
+    makes Hyprland skip xcb_set_input_focus for the overlay: the X keyboard
+    stays on Hearthstone, while the overlay still receives pointer clicks and
+    is still raised in the X stacking order on focus (unlike the rolled-back
+    no_focus window rule, which broke HDT panel clicks).
+
+    Wine may rewrite WM_HINTS at any time, so the hint is re-asserted every
+    cycle. If the overlay somehow already holds the X input focus (e.g. it was
+    focused before this guard started), the focus is handed back to the game.
+    """
+    disp = _get_x_display()
+    if disp is None:
+        return
+    overlay_ids = _find_x11_windows_by_exact_title(
+        OVERLAY_TITLE_PATTERN, "HearthstoneOverlay"
+    )
+    if not overlay_ids:
+        _overlay_hint_applied.clear()
+        return
+    try:
+        for xid in overlay_ids:
+            window = disp.create_resource_object("window", xid)
+            hints = window.get_wm_hints()
+            already_no_input = (
+                hints is not None
+                and hints.flags & _Xutil.InputHint
+                and not hints.input
+            )
+            if already_no_input:
+                continue
+            if hints is None:
+                window.set_wm_hints(flags=_Xutil.InputHint, input=0)
+            else:
+                hints.flags |= _Xutil.InputHint
+                hints.input = 0
+                window.set_wm_hints(hints)
+            disp.sync()
+            if xid not in _overlay_hint_applied:
+                log_autoclose(
+                    f"overlay {xid}: forced WM_HINTS input=False (chat focus fix)"
+                )
+                _overlay_hint_applied.add(xid)
+        _overlay_hint_applied.intersection_update(overlay_ids)
+        _release_stale_overlay_x_focus(disp, overlay_ids)
+    except Exception:
+        _drop_x_display()
+
+
+def _release_stale_overlay_x_focus(disp, overlay_ids: list[int]) -> None:
+    focus_id = getattr(disp.get_input_focus().focus, "id", None)
+    if focus_id not in overlay_ids:
+        return
+    for game_id in _find_x11_windows_by_exact_title(GAME_TITLE_PATTERN, "Hearthstone"):
+        game = disp.create_resource_object("window", game_id)
+        disp.set_input_focus(game, _X.RevertToPointerRoot, _X.CurrentTime)
+        disp.sync()
+        log_autoclose(
+            f"overlay {focus_id}: released stale X input focus to Hearthstone {game_id}"
+        )
+        return
 
 
 def parse_shell_geometry(output: str) -> dict[str, int]:
@@ -791,6 +905,7 @@ def main() -> int:
             update_windows()
             hide_empty_wine_helpers()
             hide_overlay_from_taskbar()
+            enforce_overlay_no_input_hint()
             clients = normalize_hypr_windows()
             sync_game_workspace_x11_mapping(clients)
             enforce_x11_geometry()
