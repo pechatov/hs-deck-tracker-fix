@@ -19,14 +19,19 @@ HDT_TITLE = "Hearthstone Deck Tracker"
 OVERLAY_TITLE = "HearthstoneOverlay"
 GAME_PROCESS = "hearthstone.exe"
 HDT_PROCESS = "hearthstone deck tracker.exe"
-PREFIX_ROOT = Path("/home/mike/Games/hs/battlenet")
+USER_HOME = Path.home()
+PREFIX_ROOT = USER_HOME / "Games/hs/battlenet"
 HDT_EXE = (
     PREFIX_ROOT
     / "drive_c/users/steamuser/AppData/Local/HearthstoneDeckTracker"
     / "Hearthstone Deck Tracker/Hearthstone Deck Tracker.exe"
 )
-HDT_PRELAUNCH = Path("/home/mike/.local/share/lutris/scripts/hdt-prelaunch.py")
+HDT_PRELAUNCH = USER_HOME / ".local/share/lutris/scripts/hdt-prelaunch.py"
 ICON = "hearthstone-deck-tracker"
+DIAGNOSTIC_WINEDEBUG = (
+    "-all,+timestamp,+pid,+tid,+threadname,"
+    "err+seh,err+eventlog,err+mscoree"
+)
 START_TIMEOUT_SECONDS = 60.0
 CLEAN_CLOSE_TIMEOUT_SECONDS = 8.0
 TERM_TIMEOUT_SECONDS = 5.0
@@ -48,6 +53,13 @@ RUNTIME_ENV_PREFIXES = (
     "VKD3D_",
     "__GL_SHADER_",
 )
+UNRELATED_ENV_NAMES = {
+    "APPDIR",
+    "ELECTRON_RUN_AS_NODE",
+    "FC_FONTATIONS",
+    "GDK_BACKEND",
+}
+UNRELATED_ENV_PREFIXES = ("CODEX_", "T3_")
 
 RUNTIME_DIR = Path(os.environ.get("XDG_RUNTIME_DIR", f"/tmp/runtime-{os.getuid()}"))
 LOCK_PATH = RUNTIME_DIR / "hdt-overlay-restart.lock"
@@ -58,6 +70,8 @@ def log(message: str) -> None:
     """Append a compact diagnostic record without making restart depend on it."""
     try:
         RUNTIME_DIR.mkdir(parents=True, exist_ok=True)
+        LOG_PATH.touch(mode=0o600, exist_ok=True)
+        LOG_PATH.chmod(0o600)
         with LOG_PATH.open("a", encoding="utf-8") as output:
             output.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {message}\n")
     except OSError:
@@ -284,7 +298,16 @@ def launch_hdt() -> bool:
                 log(f"HDT compatibility guard failed with status {guard.returncode}")
                 return False
 
+            # Keep the host session environment, but never leak IDE/harness
+            # variables into Wine. Copy only the Proton runtime controls from
+            # the game: its complete environment contains container-internal
+            # paths that are invalid for a new host-side umu-run process.
             child_environment = os.environ.copy()
+            for key in tuple(child_environment):
+                if key in UNRELATED_ENV_NAMES or key.startswith(
+                    UNRELATED_ENV_PREFIXES
+                ):
+                    child_environment.pop(key)
             child_environment.update(
                 {
                     key: value
@@ -298,6 +321,8 @@ def launch_hdt() -> bool:
                     "PROTONPATH": proton_path,
                     "PROTON_VERB": "runinprefix",
                     "STEAM_COMPAT_DATA_PATH": str(PREFIX_ROOT),
+                    "UMU_LOG": "0",
+                    "WINEDEBUG": DIAGNOSTIC_WINEDEBUG,
                     "WINEPREFIX": str(PREFIX_ROOT),
                 }
             )
@@ -308,6 +333,7 @@ def launch_hdt() -> bool:
                 "Launching HDT directly in Hearthstone's active "
                 f"UMU/Proton prefix ({proton_path})"
             )
+            log("Wine SEH/.NET event diagnostics enabled for this HDT process")
             subprocess.Popen(
                 [umu_run, str(HDT_EXE)],
                 stdin=subprocess.DEVNULL,
