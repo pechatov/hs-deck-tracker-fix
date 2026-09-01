@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import shutil
 import struct
@@ -27,11 +28,20 @@ import sys
 from pathlib import Path
 
 
+WINE_PREFIX = Path(
+    os.environ.get(
+        "HDT_WINE_PREFIX",
+        str(Path.home() / "Games/hs/battlenet"),
+    )
+)
 HDT_DIR = Path(
     os.environ.get(
         "HDT_DIR",
-        "/home/mike/Games/hs/battlenet/drive_c/users/steamuser/AppData/Local/"
-        "HearthstoneDeckTracker/Hearthstone Deck Tracker",
+        str(
+            WINE_PREFIX
+            / "drive_c/users/steamuser/AppData/Local/HearthstoneDeckTracker/"
+            "Hearthstone Deck Tracker"
+        ),
     )
 )
 EXE = HDT_DIR / "Hearthstone Deck Tracker.exe"
@@ -39,8 +49,21 @@ SCRY = HDT_DIR / "untapped-scry-dotnet.dll"
 CONFIG = Path(
     os.environ.get(
         "HDT_CONFIG",
-        "/home/mike/Games/hs/battlenet/drive_c/users/steamuser/AppData/Roaming/"
-        "HearthstoneDeckTracker/config.xml",
+        str(
+            WINE_PREFIX
+            / "drive_c/users/steamuser/AppData/Roaming/"
+            "HearthstoneDeckTracker/config.xml"
+        ),
+    )
+)
+BATTLE_NET_CONFIG = Path(
+    os.environ.get(
+        "BATTLE_NET_CONFIG",
+        str(
+            WINE_PREFIX
+            / "drive_c/users/steamuser/AppData/Roaming/Battle.net/"
+            "Battle.net.config"
+        ),
     )
 )
 BACKUP_ROOT = Path(
@@ -77,6 +100,58 @@ TOOLTIP_RUNTIME_FILES = (
 )
 
 
+def keep_battle_net_open_during_game() -> bool:
+    """Keep Battle.net alive so the launcher can close it after Hearthstone."""
+    if not BATTLE_NET_CONFIG.is_file():
+        print(
+            f"Battle.net lifecycle: config not found: {BATTLE_NET_CONFIG}",
+            file=sys.stderr,
+        )
+        return False
+
+    try:
+        config = json.loads(BATTLE_NET_CONFIG.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        print(
+            f"Battle.net lifecycle: could not read config: {error}",
+            file=sys.stderr,
+        )
+        return False
+
+    client = config.setdefault("Client", {})
+    if not isinstance(client, dict):
+        print(
+            "Battle.net lifecycle: Client config has an unexpected format",
+            file=sys.stderr,
+        )
+        return False
+    if client.get("GameLaunchWindowBehavior") == "0":
+        print("Battle.net lifecycle: launcher will stay open during Hearthstone")
+        return True
+
+    client["GameLaunchWindowBehavior"] = "0"
+    temporary = BATTLE_NET_CONFIG.with_name(
+        f".{BATTLE_NET_CONFIG.name}.lifecycle.tmp"
+    )
+    try:
+        temporary.write_text(
+            json.dumps(config, ensure_ascii=False, indent=4) + "\n",
+            encoding="utf-8",
+        )
+        shutil.copymode(BATTLE_NET_CONFIG, temporary)
+        os.replace(temporary, BATTLE_NET_CONFIG)
+    except OSError as error:
+        temporary.unlink(missing_ok=True)
+        print(
+            f"Battle.net lifecycle: could not update config: {error}",
+            file=sys.stderr,
+        )
+        return False
+
+    print("Battle.net lifecycle: launcher will stay open during Hearthstone")
+    return True
+
+
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -111,6 +186,33 @@ def set_auto_updates(enabled: bool) -> bool:
     temporary.write_bytes(data.replace(opposite, replacement, 1))
     shutil.copymode(CONFIG, temporary)
     os.replace(temporary, CONFIG)
+    return True
+
+
+def force_software_rendering() -> bool:
+    """Disable WPF hardware rendering, which is unstable under Wine."""
+    if not CONFIG.is_file():
+        print(f"HDT rendering guard: config not found: {CONFIG}", file=sys.stderr)
+        return False
+
+    data = CONFIG.read_bytes()
+    hardware = b"<UseHardwareAcceleration>true</UseHardwareAcceleration>"
+    software = b"<UseHardwareAcceleration>false</UseHardwareAcceleration>"
+    if software in data:
+        return True
+    if data.count(hardware) != 1:
+        print(
+            "HDT rendering guard: UseHardwareAcceleration has an unexpected "
+            "format; leaving config unchanged",
+            file=sys.stderr,
+        )
+        return False
+
+    temporary = CONFIG.with_name(f".{CONFIG.name}.rendering-guard.tmp")
+    temporary.write_bytes(data.replace(hardware, software, 1))
+    shutil.copymode(CONFIG, temporary)
+    os.replace(temporary, CONFIG)
+    print("HDT rendering guard: software rendering forced for Wine stability")
     return True
 
 
@@ -427,6 +529,13 @@ def print_status() -> None:
     else:
         update_status = "disabled in HDT config"
     print(f"automatic updates: {update_status}")
+    if b"<UseHardwareAcceleration>false</UseHardwareAcceleration>" in config:
+        rendering_status = "software (Wine stability guard)"
+    elif b"<UseHardwareAcceleration>true</UseHardwareAcceleration>" in config:
+        rendering_status = "hardware (unsafe under Wine)"
+    else:
+        rendering_status = "unknown"
+    print(f"rendering mode: {rendering_status}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -454,6 +563,10 @@ def main() -> int:
             return 0
         return 1
 
+    if not keep_battle_net_open_during_game():
+        return 1
+    if not force_software_rendering():
+        return 1
     if not EXE.is_file():
         print(f"HDT Wine overlay patch: executable not found: {EXE}", file=sys.stderr)
         return 0

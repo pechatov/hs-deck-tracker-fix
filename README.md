@@ -1,6 +1,6 @@
 # Hearthstone Deck Tracker под Wine: исправления и обновление
 
-Состояние обновлено 11 августа 2026 года. Этот каталог — автономная документация и набор исходных патчей. Рабочие файлы HDT, Lutris и Hyprland остаются в своих системных каталогах; удаление этого каталога не отключит уже установленный фикс.
+Состояние обновлено 19 августа 2026 года. Этот каталог — автономная документация и набор исходных патчей. Рабочие файлы HDT, Lutris и Hyprland остаются в своих системных каталогах; удаление этого каталога не отключит уже установленный фикс.
 
 ## Коротко: что делать обычно
 
@@ -26,7 +26,7 @@
 Нормальный результат для зафиксированной сборки:
 
 ```text
-executable: 41e8df362b951d81a0c4b897f1e264a7030bfc4ad90098bfa8c5fe2e45bbcc72
+executable: 1dd610ac626a621d629d775bea21e3df08e89381478d16127b4d234db18bf7b9
 Wine button fix: yes
 fixed overlay geometry: yes
 Wine tooltip zero-state fix: yes
@@ -53,8 +53,10 @@ automatic updates: pinned by Wine compatibility guard
 |---|---|
 | `README.md` | Эта инструкция |
 | `hdt-prelaunch.py` | Точная резервная копия активного pre-launch guard |
-| `hdt-wine-functional.patch` | Текущий единый функциональный source-патч для чистого HDT v1.55.3 |
-| `hdt-wine-functional-v1.55.3.patch` | Версионная копия текущего патча для v1.55.3 |
+| `hdt-wine-functional.patch` | Текущий единый функциональный source-патч для чистого HDT v1.56.1 |
+| `hdt-wine-functional-v1.56.1.patch` | Версионная копия текущего патча для v1.56.1 |
+| `hdt-wine-functional-v1.55.6.patch` | Историческая копия патча для v1.55.6 |
+| `hdt-wine-functional-v1.55.3.patch` | Историческая копия патча для v1.55.3 |
 | `hdt-wine-functional-v1.55.1.patch` | Историческая копия патча для v1.55.1 |
 | `hdt-wine-functional-v1.55.0.patch` | Историческая копия патча для v1.55.0 |
 | `hdt-wine-functional-v1.54.2.patch` | Историческая копия патча для v1.54.2 |
@@ -68,30 +70,33 @@ automatic updates: pinned by Wine compatibility guard
 | `PATCH-MANIFEST.txt` | Краткий исходный манифест установленной сборки |
 | `MATERIALS.md` | Карта всех сохранённых материалов и автономное восстановление |
 | `SHA256SUMS` | Контрольные суммы файлов набора и ключевых рабочих артефактов |
-| `artifacts/hdt-working-v1.55.3-recent-games.tar.zst` | Текущий полный рабочий каталог HDT с историей 20 матчей |
-| `artifacts/hdt-working-v1.55.3-recent-games.contents.sha256` | Хэши всех 169 файлов внутри текущего автономного снимка |
+| `artifacts/hdt-working-v1.56.1-recent-games.tar.zst` | Текущий полный рабочий каталог HDT с историей 20 матчей |
+| `artifacts/hdt-working-v1.56.1-recent-games.contents.sha256` | Хэши всех 168 файлов внутри текущего автономного снимка |
+| `artifacts/hdt-working-v1.55.6-recent-games.tar.zst` | Исторический полный рабочий каталог HDT v1.55.6 |
+| `artifacts/hdt-working-v1.55.3-recent-games.tar.zst` | Исторический полный рабочий каталог HDT v1.55.3 с историей 20 матчей |
 | `artifacts/hdt-working-v1.55.3-pre-chat.tar.zst` | Исторический рабочий каталог до экспериментов с чатом и новой истории игр |
 | `config/hearthstone-plus-deck-tracker.yml` | Снимок конфигурации совместной записи Lutris |
 | `config/hearthstone-deck-tracker.yml` | Исторический снимок удалённой отдельной записи HDT; в активную библиотеку не импортировать |
 | `config/hdt-hearthstone-launcher.bat` | Совместный launcher Battle.net + HDT |
+| `config/nikki-hdt-proxy-domains.list` | Доменные суффиксы сервисов HDT, которые Nikki должен направлять через `PROXY` |
 | `config/hyprland-hdt.conf` | Справочная копия только относящихся к HDT правил Hyprland |
-| `config/wine-taskbar-icons.py` | Резервная копия active class/icon, geometry, routing и lifecycle guard |
+| `config/wine-taskbar-icons.py` | Резервная копия active class/icon, geometry, routing, chat-focus и lifecycle guard |
 | `config/hearthstone.desktop` | Desktop entry игры с постоянным `StartupWMClass` |
 | `config/hearthstone-deck-tracker.desktop` | Desktop entry HDT с постоянным `StartupWMClass` |
 | `config/restart-hs-overlay` | Безопасный перезапуск только HDT/overlay во время матча |
 | `config/restart-hs-overlay.desktop` | Видимый пункт «Перезапустить HS Overlay» для Rofi |
 | `assets/hearthstone-waybar.png` | Прозрачный master новой hand-drawn иконки Hearthstone для Waybar |
 
-Текущий единый патч проверен на чистом исходном коммите `9e92f445f22d04f02c179c5cf6060f220dfe8929` (тег `v1.55.3`). Временные изменения проекта, необходимые только для сборки под Wine, и сгенерированные `.resources` в функциональные патчи не включены. Версионные копии прежних патчей сохранены для воспроизведения старых сборок; для текущей v1.55.3 использовать единый патч или `hdt-wine-functional-v1.55.3.patch`. Полный готовый к автономному восстановлению каталог находится в `artifacts/hdt-working-v1.55.3-recent-games.tar.zst`; его состав и порядок применения кратко описаны в `MATERIALS.md`.
+Текущий единый патч проверен на чистом исходном коммите `00400dbfaf04e6e137893cabf0cb0ad1a4af4d47` (тег `v1.56.1`). Временные изменения проекта, необходимые только для сборки под Wine, и сгенерированные `.resources` в функциональные патчи не включены. Версионные копии прежних патчей сохранены для воспроизведения старых сборок; для текущей v1.56.1 использовать единый патч или `hdt-wine-functional-v1.56.1.patch`. Полный готовый к автономному восстановлению каталог находится в `artifacts/hdt-working-v1.56.1-recent-games.tar.zst`; его состав и порядок применения кратко описаны в `MATERIALS.md`.
 
 ## Зафиксированное рабочее состояние
 
-Версия HDT: `1.55.3.7390`.
+Версия HDT: `1.56.1.7425`.
 
 SHA-256 установленного исполняемого файла:
 
 ```text
-41e8df362b951d81a0c4b897f1e264a7030bfc4ad90098bfa8c5fe2e45bbcc72
+1dd610ac626a621d629d775bea21e3df08e89381478d16127b4d234db18bf7b9
 ```
 
 Основные пути:
@@ -130,7 +135,16 @@ Wine prefix:
 Полная резервная копия перед обновлением с v1.55.1 до v1.55.3:
   /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1553-upgrade-20260810-114440
 
-Текущая рабочая копия v1.55.3, восстановленная после полного отката экспериментов с чатом:
+Полная резервная копия перед обновлением с v1.55.3 до v1.55.6:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1556-upgrade-20260816-111348
+
+Полная резервная копия перед обновлением с v1.55.6 до v1.56.1:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1561-upgrade-20260819-061202
+
+Полная резервная копия перед исправлением Comp Guides и lifecycle overlay:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-guide-crash-fix-20260819-0554
+
+Историческая рабочая копия v1.55.3, восстановленная после полного отката экспериментов с чатом:
   /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-chat-clickthrough-20260810-173111
 
 Полная резервная копия перед добавлением истории последних 20 игр:
@@ -173,7 +187,7 @@ Desktop entries:
 
 Причиной оказался частично обновлённый каталог: x64 HDT был смешан с x86 `untapped-scry-dotnet.dll`. Трекер запускался, но Scry не мог читать состояние Battlegrounds, поэтому окна оставались пустыми.
 
-Изначально было синхронизировано полное официальное дерево v1.53.6 одной архитектуры. 2 августа 2026 года оно целиком обновлено до v1.54.2, 4 августа — до v1.55.0, 5 августа — до v1.55.1, а 10 августа — до v1.55.3; после каждого обновления устанавливался функционально исправленный x64 exe из точно того же тега. Guard сравнивает PE machine type главного exe и Scry DLL. Несовпадающее обновление не принимается.
+Изначально было синхронизировано полное официальное дерево v1.53.6 одной архитектуры. 2 августа 2026 года оно целиком обновлено до v1.54.2, 4 августа — до v1.55.0, 5 августа — до v1.55.1, 10 августа — до v1.55.3, 16 августа — до v1.55.6, а 19 августа — до v1.56.1; после каждого обновления устанавливался функционально исправленный x64 exe из точно того же тега. Guard сравнивает PE machine type главного exe и Scry DLL. Несовпадающее обновление не принимается.
 
 Важно: нельзя переносить отдельные DLL между выпусками или копировать старый custom exe поверх произвольного нового набора зависимостей. Обновляется полное дерево одного выпуска, затем для этого же исходного тега собирается custom exe.
 
@@ -205,9 +219,29 @@ Desktop entries:
 
 В `Windows/OverlayWindow.MouseOverDetection.cs` добавлена принудительная WPF/Win32 click-through-область `Rect(250, 140, 1300, 620)`. Она покрывает всю отмеченную центрально-левую часть при текущей фиксированной геометрии DP-1. Перед вызовом `SetClickthrough` случайные clickable-hit в этой зоне отбрасываются. Область действует постоянно, а не только при `_game.IsBattlegroundsMatch`: при входе в Battlegrounds, выходе в его меню и переходах между сценами этот флаг кратковременно становится `false`, из-за чего прежний фикс иногда отключался. Левая панель статистики находится левее, Bob's Buddy выше, правая панель далеко правее, поэтому их интерактивность сохраняется. Бинарный маркер: `HDT_WINE_BATTLEGROUNDS_CLICKTHROUGH_ZONE`.
 
-Попытки отдельно исправить внутриигровой чат Battle.net 10–11 августа полностью откачены: широкая нижняя click-through-зона, возврат фокуса, X11 RECORD-listener, `no_follow_mouse` и `cursor:no_warps` ухудшали работу основного overlay, но не обеспечивали стабильный ввод. Их нельзя переносить в будущие сборки.
+Попытки отдельно исправить внутриигровой чат Battle.net 10–11 августа полностью откачены: широкая нижняя click-through-зона, возврат фокуса, X11 RECORD-listener, `no_follow_mouse` и `cursor:no_warps` ухудшали работу основного overlay, но не обеспечивали стабильный ввод. Их нельзя переносить в будущие сборки. Рабочее решение для чата реализовано 1 сентября 2026 года на другом уровне — см. раздел 6a.
 
 Исправление хранится в `local-clickthrough-zone.patch` и включено в общий `hdt-wine-functional.patch`. Как и фиксированная геометрия, координаты привязаны к текущему monitor layout и должны быть пересчитаны при смене масштаба или разрешения.
+
+### 6a. Ввод в чат Battle.net не работал при запущенном overlay
+
+Симптом: чат читался, но набор текста не работал. Причина установлена по слоям:
+
+- в prefix задано `UseTakeFocus=N`, поэтому Wine публикует все окна с `WM_HINTS Input=True` и без `WM_TAKE_FOCUS`, игнорируя `WS_EX_NOACTIVATE` overlay (ICCCM-модель «Passive»);
+- при клике по полю чата сам клик честно проходит в игру через пустой X11 input-shape overlay, но hit-test Hyprland для XWayland-окон работает по прямоугольнику окна, а не по input-region, поэтому компоузитор «фокусирует» именно overlay;
+- для окна с `Input=True` XWM Hyprland вызывает `xcb_set_input_focus`, X-клавиатура уходит на overlay, и набранный текст исчезает.
+
+Исправление: `wine-taskbar-icons.py` каждый цикл принудительно ставит окну `HearthstoneOverlay` ICCCM-модель «No Input» (`WM_HINTS` с флагом `InputHint` и `input=0`, python-xlib, остальные поля hints сохраняются). Для такого окна XWM Hyprland (проверено по исходникам v0.56.2, `CXWM::focusWindow`) не переносит X input focus — клавиатура остаётся у Hearthstone, при этом:
+
+- компоузиторный фокус overlay сохраняется, поэтому `restackToTop()` продолжает поднимать его в X-стеке — клики по панелям HDT работают (именно отсутствие restack сломало кнопки при экспериментах с `no_focus`, который исключает окно из hit-test целиком);
+- мышь не затрагивается вовсе: маршрутизация кликов по-прежнему решается X-сервером по input-shape;
+- Wine не борется с внешним значением (обработчик PropertyNotify для WM_HINTS принимает его как своё) и перезаписывает его только при show/hide, minimize/restore и смене иконки — ежесекундное переутверждение guard закрывает эти окна;
+- украсть X-фокус изнутри Wine overlay не может: `can_activate_window()` отвергает `WS_EX_NOACTIVATE`;
+- если overlay уже держал X-фокус (например, был сфокусирован до старта guard), guard один раз возвращает фокус окну `Hearthstone`.
+
+Исправление полностью внешнее: exe HDT, патчи, правила Hyprland и snapshot не изменялись. Откат — убрать вызов `enforce_overlay_no_input_hint()` из главного цикла guard и перезапустить его. Первое применение видно в `$XDG_RUNTIME_DIR/hdt-autoclose.log` строкой `forced WM_HINTS input=False (chat focus fix)`.
+
+Нельзя «улучшать» это решение правилом Hyprland `no_focus`, `no_input`, `no_follow_mouse` или `cursor:no_warps` — все эти варианты проверены 10–11 августа и ломают кнопки HDT либо центральные клики. Нельзя также включать `UseTakeFocus=Y` для всего prefix: это меняет модель фокуса всех окон Wine, включая Battle.net.
 
 ### 7. Превью карты уходило за правый край экрана
 
@@ -217,18 +251,16 @@ Desktop entries:
 
 После minimize/restore Wine один раз сообщил HDT размер виртуального рабочего стола вместо client area Hearthstone. `OverlayWindow.UpdatePosition()` принял его без проверки: окно игры оставалось `(11,50) 2730×1091`, а `HearthstoneOverlay` разрастался примерно до `4264×1161`. Bob's Buddy центрировался уже по ошибочной ширине, а нижний `PlayerCounters` со значением вроде tavern spell `+9/+10` пересчитывался через тот же неправильный размер.
 
-В локальной сборке геометрия всего overlay теперь неизменна:
+В локальной сборке размер overlay зафиксирован. Внутренний Wine-fallback сохраняет исторические абсолютные координаты, а внешний guard переносит окно к фактическому X11-rectangle Hearthstone:
 
 ```text
-Win32/X11, используемые WPF: 3453,62 3412x1363
-Hyprland при scale 1.25:      примерно 11,50 2730x1091
-Ожидаемое окно overlay:       примерно 10,49 2729x1090
-Binary marker:                HDT_WINE_FIXED_OVERLAY_2730X1091
+Hearthstone X11:              game_x,game_y game_w×game_h
+HearthstoneOverlay X11:       game_x,game_y (game_w-1)×(game_h-1)
+Hyprland при scale 1.25:      примерно 10,50 2729×1090
+Binary fallback marker:       HDT_WINE_FIXED_OVERLAY_2730X1091
 ```
 
-При состоянии Hearthstone `Minimized` геометрия вообще не считывается. При restore, событиях окна и обычных обновлениях layout HDT повторно применяет только зафиксированный прямоугольник. Цикл minimize/restore проверен: координаты и размер overlay не изменились.
-
-Этот фикс намеренно привязан к текущему DP-1, масштабу 1.25 и расположению игры. При изменении layout мониторов или масштаба нужно заново измерить Win32/X11 rectangle и обновить четыре константы `WineFixedOverlay*` в `Windows/OverlayWindow.Update.cs`.
+При состоянии Hearthstone `Minimized` геометрия вообще не считывается. При restore, событиях окна и обычных обновлениях layout HDT повторно применяет fallback-прямоугольник; затем guard не позднее чем через секунду синхронизирует его с текущим окном игры. При смене порядка мониторов в XWayland пересборка HDT больше не нужна.
 
 ### 8a. Пропали вероятности Bob's Buddy и нижние Battlegrounds-счётчики
 
@@ -242,18 +274,42 @@ Binary marker:                HDT_WINE_FIXED_OVERLAY_2730X1091
 
 Все строки используют штатный `BattlegroundsGameView`, поэтому для дополнительных игр сохраняются герой, место, изменение MMR и финальный билд при наведении. Очистка истории по возрасту больше не удаляет последние 20 игр: записи старше семи дней удаляются только сверх этого минимума. Изменение и три теста хранения находятся в `local-recent-games.patch` и включены в общий `hdt-wine-functional.patch`.
 
+### 8c. Comp Guides оставались пустыми
+
+Nikki на OpenWrt выдавал сервисам HDT fake-IP из диапазона `198.18.0.0/16`, но соединения с `hsreplay.net`, `hearthstonejson.com` и `hsdecktracker.net` попадали под финальное правило `Match` и уходили через `DIRECT`. Этот маршрут обрывал или задерживал HTTPS-запросы: в логе HDT появлялись `TaskCanceledException` и `unexpected EOF`, а Comp Guides навсегда оставались в состоянии загрузки.
+
+Доменные суффиксы добавлены в постоянный proxy-список Nikki через `/etc/nikki/scripts/custom-proxy-domain.sh`. Переносимая копия списка находится в `config/nikki-hdt-proxy-domains.list`. Повторно применить правила можно с этой машины:
+
+```bash
+while read -r domain; do
+  ssh router "/etc/nikki/scripts/custom-proxy-domain.sh add_proxy '$domain'"
+done < config/nikki-hdt-proxy-domains.list
+```
+
+После применения hero, anomaly, trinket и quest guides, а также конфигурация HDT отвечают HTTP `200`; соединения видны в контроллере Nikki как `RuleSet custom_proxy_domains` через `PROXY`. В исходниках дополнительно исправлено ошибочное состояние UI: если API Comp Guides вернул `null`, панель теперь переходит в `Error` с возможностью повторить запрос, а не остаётся пустой в `Loading`.
+
+### 8d. Overlay иногда «крашился»
+
+В журнале процесс HDT часто продолжал работать, но Wine закрывал долгоживущее WPF-окно `HearthstoneOverlay`. Следующая попытка показать его завершалась ошибкой `Cannot set Visibility or call Show ... after a Window has closed`, из-за чего tracker выглядел упавшим и уже не восстанавливался без перезапуска.
+
+`OverlayWindow.Window_Closing` теперь отменяет неожиданный запрос закрытия overlay, пока не начат штатный `Core.Shutdown`. Обработчик старта матча в Comp Guides также перехватывает сетевые исключения и гарантированно освобождает semaphore, поэтому ошибка загрузки гайдов больше не может уйти из `async void` и завершить приложение.
+
 ### 9. Вместо иконок HDT и Hearthstone в Waybar были вопросики
 
 UMU/Proton назначал игре, HDT и их служебным XWayland-окнам один `WM_CLASS`: `steam_app_default`. Модуль `wlr/taskbar` подбирает иконку по этому значению и не может различить два приложения, поэтому показывал fallback со знаком вопроса.
 
-Для иконок активный `wine-taskbar-icons.py` выполняет четыре точечных действия:
+Активный `wine-taskbar-icons.py` выполняет шесть точечных действий:
 
 - окну с точным заголовком `Hearthstone` назначает класс `hearthstone-hand-drawn`;
 - окну с точным заголовком `Hearthstone Deck Tracker` назначает класс `hearthstone-deck-tracker`;
 - пустому служебному Wine-окну физического размера `160×20` выставляет `_NET_WM_STATE_SKIP_TASKBAR`.
-- прозрачному `HearthstoneOverlay` также выставляет `_NET_WM_STATE_SKIP_TASKBAR`, чтобы оно не создавало третью кнопку рядом с игрой и HDT.
+- прозрачному `HearthstoneOverlay` также выставляет `_NET_WM_STATE_SKIP_TASKBAR`, чтобы оно не создавало третью кнопку рядом с игрой и HDT;
+- тому же `HearthstoneOverlay` ежесекундно переутверждает `WM_HINTS input=False`, чтобы X-клавиатура оставалась у Hearthstone и работал ввод в чат Battle.net (раздел 6a).
+- пока workspace 5 виден, делает `UnMapped` все XWayland-окна на неактивных workspace того же монитора, а при уходе с игрового workspace возвращает их.
 
 `HearthstoneOverlay`, `Session Recap`, `Hidden Window` и остальные окна HDT скрипт не переименовывает. Это важно: правило прозрачности overlay по-прежнему сопоставляется с `steam_app_default`.
+
+Последнее действие исправляет XWayland click-through между workspace. Hyprland не показывал окна с workspace 3, но XWayland оставлял их `IsViewable` в том же root-rectangle, что и Hearthstone. Когда overlay пропускал клик, X11 мог выбрать любое такое скрытое окно раньше игры. Guard сопоставляет окна по PID, title, class и физическому размеру, поэтому решение не зависит от имён HDT, Battle.net, Steam или других приложений. Runtime-файл хранит точный набор скрытых XID и их identity, так что окна восстанавливаются и после аварийного перезапуска guard; процессы при этом не останавливаются.
 
 Для обоих новых классов установлены desktop entries. Для Hearthstone используется выбранная пользователем [Color Hand Drawn icon от Icons8](https://icons8.com/icon/Undt8wxX4y4V/hearthstone): белые углы исходного JPG сделаны прозрачными, а обработанный master сохранён как `assets/hearthstone-waybar.png`. Уникальные `Icon=` и `StartupWMClass=hearthstone-hand-drawn` не дают теме Tela снова подменить значок. В `hicolor` установлены варианты 16, 22, 24, 32, 48, 64, 128, 256 и 512 пикселей. Иконка HDT по-прежнему берётся из штатного `Images/HearthstoneDeckTracker.ico`. Скрипт запускается из `~/.config/hypr/userprefs.conf` через `exec-once` и защищён lock-файлом от дубликатов.
 
@@ -277,12 +333,12 @@ Hearthstone:
 
 HearthstoneOverlay:
   workspace 5, floating, not fullscreen
-  X11:       3453,62 3412x1363
+  X11:       тот же origin, что у Hearthstone; размер меньше на 1 px
   Hyprland:  10,49 2729x1090
 
 HDT main window:
-  workspace 3, floating, not fullscreen
-  X11:       3612,72 1200x675
+  workspace 3, floating, not fullscreen (when mapped)
+  X11:       Hearthstone X11 +159,+10 1200x675
   Hyprland:  138,58 960x540
 ```
 
@@ -290,7 +346,7 @@ HDT main window:
 
 Таким образом, настоящий fullscreen для Hearthstone/HDT намеренно запрещён: он несовместим с проверенной фиксированной геометрией overlay. Нормальный tiled-режим Hearthstone уже занимает всю доступную область DP-1, кроме Waybar. Ручной move/resize может быть виден не более одного цикла guard (до одной секунды), после чего окно возвращается на место.
 
-Это внешний конфигурационный слой вне Wine prefix, поэтому обычное обновление HDT его не удаляет. При изменении монитора, scale или расположения DP-1 нужно синхронно пересчитать и внутренние `WineFixedOverlay*`, и `X11_GEOMETRIES` в guard.
+Это внешний конфигурационный слой вне Wine prefix, поэтому обычное обновление HDT его не удаляет. Guard считывает X11-позицию Hearthstone каждый цикл и не хранит абсолютную `X11_GEOMETRIES`, поэтому порядок мониторов в XWayland больше не выносит overlay за границу экрана.
 
 ### 11. Battle.net открывался не рядом с Lutris
 
@@ -319,9 +375,17 @@ Window guard теперь содержит lifecycle state machine. Она на�
 4. при текущем `<CloseToTray>false</CloseToTray>` HDT вызывает `Core.Shutdown()`, сохраняет конфиг, статистику, колоды и настройки плагинов;
 5. только если чистое завершение не закончилось ещё за 15 секунд, guard отправляет `SIGTERM` оставшемуся процессу HDT.
 
-После исчезновения HDT lifecycle-state сбрасывается. Поэтому следующий отдельный запуск tracker снова безопасно ждёт фактического запуска Hearthstone. Если сам guard был перезапущен уже после закрытия игры, он также не убивает существующий HDT: это безопасное поведение против ложного срабатывания.
+Если HDT уже был замечен во время живой игровой сессии, но его процесс внезапно исчез, guard ждёт 3 секунды и запускает `restart-hs-overlay`. Recovery повторно проверяет живой `Hearthstone.exe`, поднимает только tracker в том же UMU/Proton prefix и не вызывает `wineserver -k`. Исчезновение обоих процессов при нормальном выходе из игры не считается сбоем. После успешного восстановления состояние снова взводится, поэтому защищён и повторный crash в той же сессии.
 
-Переходы записываются только при событиях в `$XDG_RUNTIME_DIR/hdt-autoclose.log`; постоянного ежесекундного лог-спама нет. End-to-end тест на временных XWayland-окнах подтвердил: игра была замечена, после её закрытия начался timer, через 7 секунд был отправлен `WM_CLOSE`, ещё через секунду тестовый tracker исчез.
+После исчезновения HDT вне живой игры lifecycle-state сбрасывается. Поэтому следующий отдельный запуск tracker снова безопасно ждёт фактического запуска Hearthstone. Если сам guard был перезапущен уже после закрытия игры, он также не убивает существующий HDT: это безопасное поведение против ложного срабатывания.
+
+Переходы, включая crash recovery, записываются только при событиях в `$XDG_RUNTIME_DIR/hdt-autoclose.log`; постоянного ежесекундного лог-спама нет. End-to-end тест на временных XWayland-окнах подтвердил: игра была замечена, после её закрытия начался timer, через 7 секунд был отправлен `WM_CLOSE`, ещё через секунду тестовый tracker исчез.
+
+### 12a. HDT внезапно завершался посреди Battlegrounds
+
+Четыре подтверждённых сбоя 19–20 августа 2026 года оборвали `hdt_log` посреди Battlegrounds без managed exception, `Crash Reports`, coredump, kernel OOM или cgroup OOM. UMU при этом зафиксировал самостоятельный выход дочернего процесса с кодом 1. Два новых сбоя произошли уже после принудительного включения `<UseHardwareAcceleration>false</UseHardwareAcceleration>`, поэтому гипотеза о WPF hardware rendering как единственной причине опровергнута.
+
+Recovery launcher теперь удаляет переменные desktop/IDE harness и берёт из живого `Hearthstone.exe` только переносимые настройки Proton/UMU; полное окружение игры копировать нельзя из-за container-internal путей Steam Runtime. Для восстановленного HDT он включает только узкую Wine-трассировку `seh`, `eventlog` и `mscoree`, отключает подробный UMU environment dump и защищает runtime-log правами `0600`. Это не меняет Hearthstone и предназначено для фиксации точного необработанного .NET/Wine exception при следующем естественном падении.
 
 ### 13. После обновления системы Lutris перестал видеть executable
 
@@ -372,15 +436,16 @@ Pre-launch script подключён к обеим записям Lutris чер�
 При каждом запуске он выполняет следующее:
 
 1. Управляет закреплением updater и одноразовой попыткой обновления.
-2. Проверяет наличие fully-qualified маркера `Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.OverlayButton` в exe.
-3. Проверяет локальный UTF-16LE-маркер фиксированной геометрии `HDT_WINE_FIXED_OVERLAY_2730X1091`.
-4. Проверяет маркеры `HDT_WINE_TOOLTIP_NO_ZERO_STATE`, `HDT_WINE_OPACITY_MASK_DISABLED` и `HDT_WINE_BATTLEGROUNDS_CLICKTHROUGH_ZONE`.
-5. Проверяет наличие пяти DLL, нужных новой сборке для preserialized WPF-ресурсов.
-6. Проверяет, что бинарный layout прозрачной кисти известен: присутствует ровно исходный или уже исправленный вариант.
-7. Сравнивает архитектуру `Hearthstone Deck Tracker.exe` и `untapped-scry-dotnet.dll`.
-8. При необходимости создаёт резервную копию exe и применяет минимальную transparency-замену.
-9. После успешной проверки копирует полное дерево HDT в `working-current-wine`.
-10. Если обновление несовместимо, сохраняет его полное дерево в `rejected-updates/<sha256>/` и атомарно возвращает последний рабочий snapshot.
+2. Принудительно отключает нестабильный под Wine WPF hardware rendering.
+3. Проверяет наличие fully-qualified маркера `Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.OverlayButton` в exe.
+4. Проверяет локальный UTF-16LE-маркер фиксированной геометрии `HDT_WINE_FIXED_OVERLAY_2730X1091`.
+5. Проверяет маркеры `HDT_WINE_TOOLTIP_NO_ZERO_STATE`, `HDT_WINE_OPACITY_MASK_DISABLED` и `HDT_WINE_BATTLEGROUNDS_CLICKTHROUGH_ZONE`.
+6. Проверяет наличие пяти DLL, нужных новой сборке для preserialized WPF-ресурсов.
+7. Проверяет, что бинарный layout прозрачной кисти известен: присутствует ровно исходный или уже исправленный вариант.
+8. Сравнивает архитектуру `Hearthstone Deck Tracker.exe` и `untapped-scry-dotnet.dll`.
+9. При необходимости создаёт резервную копию exe и применяет минимальную transparency-замену.
+10. После успешной проверки копирует полное дерево HDT в `working-current-wine`.
+11. Если обновление несовместимо, сохраняет его полное дерево в `rejected-updates/<sha256>/` и атомарно возвращает последний рабочий snapshot.
 
 Команды управления:
 
@@ -545,15 +610,15 @@ hyprctl clients -j | jq \
   '.[] | select(.title == "Hearthstone" or .title == "HearthstoneOverlay" or .title == "Hearthstone Deck Tracker") | {title, class, workspace: .workspace.id, at, size, floating, fullscreen, fullscreenClient}'
 ```
 
-Оба окна должны находиться на workspace 5. Для текущей конфигурации ожидается:
+Игра и overlay должны находиться на workspace 5. Для текущей конфигурации ожидается:
 
 ```text
 Hearthstone:        at [11,50], size [2730,1091]
 HearthstoneOverlay: at [10,49], size [2729,1090]
-HDT main window:    at [138,58], size [960,540]
+HDT main window:    нет в `hyprctl clients`, пока workspace 5 активен
 ```
 
-У всех трёх окон `fullscreen` и `fullscreenClient` должны быть `0`. Hearthstone и overlay находятся на workspace 5, главное окно HDT — на workspace 3. Значения вроде overlay `[0,0] 666×457` означают внешний resize, а `[0,49] 4264×1161` — возврат Wine-бага.
+У Hearthstone и overlay `fullscreen` и `fullscreenClient` должны быть `0`. При переходе на workspace 3 главное окно HDT снова появляется там с `at [138,58]`, `size [960,540]` и нулевыми fullscreen-state. Значения вроде overlay `[0,0] 666×457` означают внешний resize, а `[0,49] 4264×1161` — возврат Wine-бага.
 
 После ручного изменения правил:
 
@@ -604,6 +669,17 @@ HDT_WINE_FIXED_OVERLAY_2730X1091: locking overlay to 3453,62 3412x1363
 3. Закрыть и HDT, и Hearthstone; выполнить совместный запуск.
 4. Если это началось сразу после обновления, вернуть датированный snapshot. Не заменять только одну DLL.
 
+Если пусты именно `Comp Guides`, сначала проверить сетевые API:
+
+```bash
+curl -fsS -o /dev/null -w '%{http_code}\n' \
+  'https://hsreplay.net/api/v1/battlegrounds/hero_guides/?game_language=enUS'
+ssh router '/etc/nikki/scripts/custom-proxy-domain.sh list_proxy' | \
+  grep -E '^(hsreplay\.net|hearthstonejson\.com|hsdecktracker\.net)$'
+```
+
+Ожидается HTTP `200` и все три домена в списке. Если записи отсутствуют, повторно применить `config/nikki-hdt-proxy-domains.list` командой из раздела 8c, затем перезапустить только overlay через Rofi. `TaskCanceledException` или `unexpected EOF` для этих доменов означают проблему маршрутизации, а не Scry или архитектуры DLL.
+
 ### Если правая панель снова не кликается
 
 1. Проверить `Wine button fix: yes`.
@@ -617,6 +693,14 @@ HDT_WINE_FIXED_OVERLAY_2730X1091: locking overlay to 3453,62 3412x1363
 2. Если marker отсутствует, обычный pre-launch должен вернуть рабочий snapshot.
 3. Если monitor scale или разрешение менялись, пересчитать `WineBattlegroundsClickthroughRegion` в WPF/Win32-координатах и пересобрать exe.
 4. Не расширять зону на левую session-панель, верхний Bob's Buddy или правые Guides/Minions: эти элементы должны оставаться интерактивными.
+
+### Если снова не печатается в чат Battle.net
+
+1. Проверить guard: `pgrep -af wine-taskbar-icons.py` — процесс должен быть запущен.
+2. Проверить хинт: `xprop -id $(xdotool search --name '^HearthstoneOverlay$' | head -1) WM_HINTS` — строка `Client accepts input or input focus` должна быть `False`. Если `True` дольше пары секунд, python-xlib недоступен интерпретатору guard или guard устарел — сверить с `config/wine-taskbar-icons.py`.
+3. Найти в `$XDG_RUNTIME_DIR/hdt-autoclose.log` строку `forced WM_HINTS input=False (chat focus fix)` для текущего окна overlay.
+4. Один раз кликнуть по полю ввода чата (клик должен попасть в игру, а не в панель HDT) и набрать текст.
+5. Не решать проблему правилами `no_focus`/`no_input`/`no_follow_mouse` или `UseTakeFocus=Y` — см. раздел 6a.
 
 ### Если preview снова справа или hover тормозит
 
@@ -786,13 +870,13 @@ tar --zstd -xf \
 ```bash
 git clone https://github.com/HearthSim/Hearthstone-Deck-Tracker.git
 cd Hearthstone-Deck-Tracker
-git checkout 9e92f445f22d04f02c179c5cf6060f220dfe8929
+git checkout 00400dbfaf04e6e137893cabf0cb0ad1a4af4d47
 git apply --check /home/mike/projects/deck-tracker-fix/hdt-wine-functional.patch
 git apply /home/mike/projects/deck-tracker-fix/hdt-wine-functional.patch
 git diff --check
 ```
 
-Единый патч включает PR #4741, hover-оптимизацию, preview слева, фиксированную геометрию overlay, отключение несовместимой оконной opacity mask, постоянную центрально-левую click-through-зону и историю последних 20 игр с финальными билдами. Текущий `hdt-wine-functional.patch` рассчитан на базу v1.55.3; для старых сборок сохранены версионные патчи v1.55.1, v1.55.0, v1.54.2 и v1.53.6.
+Единый патч включает PR #4741, hover-оптимизацию, preview слева, фиксированную геометрию overlay, отключение несовместимой оконной opacity mask, постоянную центрально-левую click-through-зону, историю последних 20 игр с финальными билдами, защиту lifecycle overlay и устойчивое состояние Comp Guides при сетевых ошибках. Текущий `hdt-wine-functional.patch` рассчитан на базу v1.56.1; для старых сборок сохранены версионные патчи v1.55.6, v1.55.3, v1.55.1, v1.55.0, v1.54.2 и v1.53.6.
 
 ### Новый официальный тег
 
@@ -839,7 +923,7 @@ Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs
 
 ## Примечания по сборке
 
-Текущая сборка была получена под Wine с Windows .NET SDK 8.0.100 и .NET Framework 4.7.2 reference assemblies. После системного обновления Windows SDK под Wine запускается с `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1`, иначе несовпадение системной ICU и Wine останавливает `dotnet.exe` до MSBuild. NuGet assets восстанавливаются нативным Linux SDK с `--runtime win7-x64`, затем Windows-сборка выполняется с `--no-restore`: Wine не принимает просроченные подписи исторических NuGet-пакетов. Библиотеки взяты из полного официального архива v1.55.3. Localization зафиксирован на коммите `9a4e3f59ed090a6584349738e321834ca7d25f9b`; `Strings.Designer.cs` сгенерирован отдельным build-only инструментом. Для preserialized ресурсов временно использовался `System.Resources.Extensions`; изменение `.csproj` после сборки полностью отменено.
+Текущая сборка была получена под Wine с Windows .NET SDK 8.0.100 и .NET Framework 4.7.2 reference assemblies. Windows SDK под Wine запускается в PTY с `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1`: без PTY Wine 11.15 не даёт .NET изменить console encoding, а без invariant mode несовпадение системной ICU останавливает `dotnet.exe` до MSBuild. NuGet assets восстанавливаются нативным Linux SDK с `--runtime win7-x64`, затем Windows-сборка выполняется с `--no-restore`: Wine не принимает просроченные подписи исторических NuGet-пакетов. Библиотеки взяты из официального full-пакета v1.56.1. Localization зафиксирован на коммите `e690980437464d8046faeb9debfac9648a2bf1f3`; `Strings.Designer.cs` сгенерирован отдельным build-only инструментом. Для preserialized ресурсов временно использовался `System.Resources.Extensions`; изменение `.csproj` после сборки полностью отменено.
 
 В рабочее дерево вместе с exe входят обязательные runtime-файлы:
 
@@ -855,7 +939,7 @@ System.Runtime.CompilerServices.Unsafe.dll
 
 - собирать `Release x64`;
 - использовать зависимости ровно того же выпуска, что и исходники;
-- `AssemblyVersion` и `FileVersion` должны точно совпадать с полным номером из официального exe того же release — для v1.55.3 это `1.55.3.7390`, а не сокращённое `1.55.3`. Иначе скомпилированные WPF pack URI будут ссылаться на другую assembly и приложение упадёт до создания окна overlay;
+- `AssemblyVersion` и `FileVersion` должны точно совпадать с полным номером из официального exe того же release — для v1.56.1 это `1.56.1.7425`, а не сокращённое `1.56.1`. Иначе скомпилированные WPF pack URI будут ссылаться на другую assembly и приложение упадёт до создания окна overlay;
 - не переносить временные build-workaround изменения `.csproj` как продуктовый фикс;
 - предпочтительно собирать на Windows/VM с полноценным MSBuild/Visual Studio, где старые генераторы ресурсов поддерживаются штатно.
 
