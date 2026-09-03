@@ -1,7 +1,9 @@
 # Материалы проекта Deck Tracker Fix
 
-Актуальное состояние зафиксировано 19 августа 2026 года после обновления до
-HDT v1.56.1 с сохранением исправлений Comp Guides и lifecycle overlay.
+Актуальное состояние зафиксировано 4 сентября 2026 года после обновления до
+HDT v1.57.6 (upstream `master` `dbd9af96`, git-тегов для 1.57.x нет) с
+переносом всех локальных исправлений. Wine-фикс кнопок PR #4741 теперь входит в
+upstream и в локальный патч не включается.
 Чат намеренно не исправлен; в рабочую сборку не входят широкая
 нижняя click-through-зона, принудительный возврат фокуса, X11 RECORD-listener,
 `no_follow_mouse` и `cursor:no_warps`.
@@ -12,13 +14,17 @@ HDT v1.56.1 с сохранением исправлений Comp Guides и life
   восстановление.
 - `PATCH-MANIFEST.txt` — краткий состав функциональных изменений сборки.
 - `SHA256SUMS` — контроль целостности всего переносимого комплекта.
-- `hdt-wine-functional.patch` — единый патч для чистого upstream v1.56.1.
-- `hdt-wine-functional-v1.56.1.patch` — его версионная копия.
+- `hdt-wine-functional.patch` — единый патч для чистого upstream v1.57.6
+  (коммит `dbd9af96`), только локальные изменения.
+- `hdt-wine-functional-v1.57.6.patch` — его версионная копия.
+- `hdt-wine-functional-v1.56.1.patch` — историческая копия прошлого патча
+  (последняя, включающая PR #4741).
 - `hdt-wine-functional-v1.55.6.patch` — историческая копия прошлого патча.
 - `hdt-wine-functional-v1.55.3.patch` — историческая копия прошлого патча.
 - `local-*.patch` — отдельные локальные изменения для разбора и переноса на
   следующую версию.
-- `upstream-pr-4741.patch` — исходный Wine-фикс интерактивных кнопок.
+- `upstream-pr-4741.patch` — исходный Wine-фикс интерактивных кнопок; нужен
+  только для тегов старше v1.57.0.
 - `config/` — точные копии launcher, guard, Rofi, desktop- и Lutris-файлов,
   а также переносимый список proxy-доменов Nikki для сервисов HDT.
 - Pre-launch guard закрепляет software rendering HDT, а window guard после
@@ -27,10 +33,12 @@ HDT v1.56.1 с сохранением исправлений Comp Guides и life
 - `assets/` — исходная иконка Hearthstone для Waybar.
 - `local-recent-games.patch` — история последних 20 игр, кнопка раскрытия и
   тесты сохранения старых матчей.
-- `artifacts/hdt-working-v1.56.1-recent-games.tar.zst` — текущий полный
+- `artifacts/hdt-working-v1.57.6-recent-games.tar.zst` — текущий полный
   автономный снимок рабочего каталога HDT, включая exe, DLL, ресурсы и PDB.
-- `artifacts/hdt-working-v1.56.1-recent-games.contents.sha256` — хэши всех 168
+- `artifacts/hdt-working-v1.57.6-recent-games.contents.sha256` — хэши всех 175
   файлов внутри текущего рабочего снимка.
+- `artifacts/hdt-working-v1.56.1-recent-games.tar.zst` — исторический снимок
+  предыдущей рабочей версии.
 - `artifacts/hdt-working-v1.55.6-recent-games.tar.zst` — исторический снимок
   предыдущей рабочей версии.
 - `artifacts/hdt-working-v1.55.3-recent-games.tar.zst` — исторический снимок
@@ -41,12 +49,14 @@ HDT v1.56.1 с сохранением исправлений Comp Guides и life
 ## Зафиксированная версия
 
 ```text
-HDT:                 1.56.1.7425
-Upstream tag:        v1.56.1
-Upstream commit:     00400dbfaf04e6e137893cabf0cb0ad1a4af4d47
-Patched executable:  1dd610ac626a621d629d775bea21e3df08e89381478d16127b4d234db18bf7b9
-Archive SHA-256:     73f0f73336341202cd81e7845a9f7ab8f615e2eeaa1bff65d4e27eee49439765
-Contents manifest:   cccc7f0a5ecd2d3cf558dfe0b7dbf641be59335a6b894d6bb496dc240fd069a7
+HDT:                 1.57.6.8270
+Upstream release:    v1.57.6 (HDT-Releases, 2026-09-03)
+Upstream commit:     dbd9af96f68498dab72c67b3bf0267ae93012816 (master, без тега)
+Localization commit: 073618e76c91da02e42a31cc5fd3afd08a5122b7
+Patched executable:  d76cf0a7d6884cc5665a35eccb782ad62d03c1c5b65aed590f666d6515213a5a
+Built executable:    4de74719da41ddba6528086b38741188371fd485b7bca77737ccb1f11f063f1d (до transparency patch)
+Archive SHA-256:     23cf588e3c6941d6bb7c862aac134f9071876ee7185af02ee8f997ab779d932d
+Contents manifest:   a5fc48b53aa7609c1156615ce9421294bd33187003f89b1a12013c1b46b0f4f8
 ```
 
 Рабочий exe содержит все проверяемые guard-маркеры: Wine-кнопки,
@@ -66,16 +76,16 @@ Nikki `PROXY` воспроизводится из `config/nikki-hdt-proxy-domain
 
 ```bash
 sha256sum -c SHA256SUMS
-tar --zstd -tf artifacts/hdt-working-v1.56.1-recent-games.tar.zst >/dev/null
+tar --zstd -tf artifacts/hdt-working-v1.57.6-recent-games.tar.zst >/dev/null
 ```
 
 Для глубокой проверки содержимого архива:
 
 ```bash
 tmp="$(mktemp -d)"
-tar --zstd -xf artifacts/hdt-working-v1.56.1-recent-games.tar.zst -C "$tmp"
+tar --zstd -xf artifacts/hdt-working-v1.57.6-recent-games.tar.zst -C "$tmp"
 (cd "$tmp" && sha256sum -c \
-  /home/mike/projects/deck-tracker-fix/artifacts/hdt-working-v1.56.1-recent-games.contents.sha256)
+  /home/mike/projects/deck-tracker-fix/artifacts/hdt-working-v1.57.6-recent-games.contents.sha256)
 rm -rf "$tmp"
 ```
 
@@ -90,7 +100,7 @@ install='/home/mike/Games/hs/battlenet/drive_c/users/steamuser/AppData/Local/Hea
 snapshot='/home/mike/.local/share/lutris/backups/hdt-overlay/working-current-wine'
 tmp="$(mktemp -d)"
 
-tar --zstd -xf "$project/artifacts/hdt-working-v1.56.1-recent-games.tar.zst" -C "$tmp"
+tar --zstd -xf "$project/artifacts/hdt-working-v1.57.6-recent-games.tar.zst" -C "$tmp"
 rsync -a --delete "$tmp/" "$install/"
 rsync -a --delete "$tmp/" "$snapshot/"
 rm -rf "$tmp"
@@ -106,9 +116,12 @@ Rofi **«Перезапустить HS Overlay»**.
 
 1. Прочитать раздел «Обновление HDT» в `README.md` и сделать датированную
    резервную копию текущей установки.
-2. Взять исходники точного нового тега HDT.
-3. Перенести `hdt-wine-functional.patch` по смыслу; не копировать старый exe в
-   каталог с DLL другой версии.
+2. Взять исходники нового выпуска: номер — из HDT-Releases, базовый коммит —
+   из `master` с сообщением `v<версия>` (тегов с 1.57.x нет), полный номер
+   сборки — из официального exe в `-full.nupkg`.
+3. Перенести `hdt-wine-functional.patch` (`git apply --3way`) по смыслу; не
+   копировать старый exe в каталог с DLL другой версии. PR #4741 повторно не
+   применять — он уже в upstream.
 4. Не возвращать изменения для Battle.net-чата, перечисленные в начале файла.
 5. Собрать x86-64 exe, проверить все guard-маркеры и только затем заменить весь
    официальный каталог одной версии.
@@ -117,8 +130,12 @@ Rofi **«Перезапустить HS Overlay»**.
 Исходный рабочий каталог на этой машине:
 
 ```text
-/home/mike/projects/Hearthstone-Deck-Tracker-v1.56.1
+/home/mike/projects/Hearthstone-Deck-Tracker-v1.57.6   (ветка wine-fixes-v1.57.6)
+/home/mike/projects/Hearthstone-Deck-Tracker-v1.56.1   (предыдущая, ветка wine-fixes-v1.56.1)
 ```
+
+Окружение сборки и журналы: `~/.cache/hdt-build/v1.57.6/` (`build.log`,
+`tests.log`, `candidate-1.57.6.8270/`, `deployed-backup-path.txt`).
 
 Переносимым источником истины являются патчи и архив в этом проекте: исходный
 worktree может содержать build-артефакты и не требуется для восстановления.

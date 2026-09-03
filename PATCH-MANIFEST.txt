@@ -1,40 +1,50 @@
-Hearthstone Deck Tracker Wine overlay fixes (updated 2026-08-19)
+Hearthstone Deck Tracker Wine overlay fixes (updated 2026-09-04)
 
-Installed HDT version: 1.56.1.7425
-Patched source base: upstream v1.56.1 commit
-  00400dbfaf04e6e137893cabf0cb0ad1a4af4d47
+Installed HDT version: 1.57.6.8270
+Patched source base: upstream master commit "v1.57.6" (no git tag since 1.57.x)
+  dbd9af96f68498dab72c67b3bf0267ae93012816
+HDT-Localization commit: 073618e76c91da02e42a31cc5fd3afd08a5122b7
 Installed executable SHA-256:
-  1dd610ac626a621d629d775bea21e3df08e89381478d16127b4d234db18bf7b9
+  d76cf0a7d6884cc5665a35eccb782ad62d03c1c5b65aed590f666d6515213a5a
+Built executable before the transparency patch:
+  4de74719da41ddba6528086b38741188371fd485b7bca77737ccb1f11f063f1d
 
 Battlegrounds data compatibility update: after a Hearthstone update, v1.53.6
 HearthMirror returned an empty MatchInfo. BobsBuddyInvoker consequently failed
 with System.ArgumentException: Player, and both combat probabilities and the
 spell-damage/blood-gem counters lost their input. The installation now uses the
-complete official v1.56.1 dependency set plus a custom exe built from the exact
-same tag. Do not mix individual DLLs between releases.
+complete official v1.57.6 dependency set plus a custom exe built from the exact
+same source commit. Do not mix individual DLLs between releases.
 
-Official v1.56.1 dependency SHA-256:
+Official v1.57.6 dependency SHA-256:
   HearthMirror.dll
-    3cc1180b89582127fe737d0a8c6e03f13d460437a43511a6fc382bc958f31d1d
+    685fb0be6daf34e292b1ab269a732b054ac3b11fce89461eccdc3f66178bddbb
   HearthDb.dll
-    a9fc33bf4fd606d4fe77b61418c4e63dbf73d5872d4ae9a9d0271ce325d3b1ca
+    58ee840dd320a527b59c44fd51f56595446c776048ce68ba79311cc682ffb63b
   BobsBuddy.dll
-    183cea1e00605296852d12f80c5bfe470da97d57b00d4b4b291417510ffd02ed
+    b4c91f3806ffa81e71c1515f56afb856628c4e31f7bb7da61f93f0c1eb453281
   BobsBuddy.Common.dll
-    e6053a20a5bcfb0a07a603dd190d01389959e919f120ae99a197a1807b24da9e
+    f875a0c132ddcecc0825232f90ef6a5badc1ab0b15282453f04bc3f0d5f9e6f6
   HSReplay.dll
-    51e953fd2ad929bf3e32517846cf08e934430e5fbb29de03ce733ef3d5599de3
+    f311e9df3389b45f7287b80bb0106fe5d5b876a30b4401d4593c1bea006473bd
   untapped-scry-dotnet.dll
     20b30d2e75de8ff15544b98d819405055a1c76d3efbcb60278a15bf0eec909ad
 
-WPF release-version requirement: the upstream source file says 1.56.1, but the
-official release executable and its compiled pack URIs use 1.56.1.7425. The
-custom build must temporarily set both AssemblyVersion and FileVersion to the
-full value. A shortened version fails before creating its overlay with a
+v1.57.6 replaced SharpRaven with Sentry 6.9.0 and ships System.Buffers,
+System.Memory, System.Numerics.Vectors and System.Runtime.CompilerServices.Unsafe
+itself; only System.Resources.Extensions.dll is still added from the build.
+
+WPF release-version requirement: the upstream source file says 1.57.6, but the
+official release executable and its compiled pack URIs use 1.57.6.8270. Since
+1.57.x the csproj derives AssemblyVersion/FileVersion from Version plus the
+BuildNumber property, so the custom build passes --property:BuildNumber=8270
+instead of editing the file. A shortened version fails before creating its overlay with a
 FileNotFoundException for the mismatched HearthstoneDeckTracker assembly.
 
 Wine button fix: upstream HearthSim/Hearthstone-Deck-Tracker PR #4741,
-commit 7b32e0c164b5c751a01a61b8d664320ff4533768.
+commit 7b32e0c164b5c751a01a61b8d664320ff4533768. Merged upstream as
+ae406518 (OverlayButton now reacts to MouseUp of any button); since 1.57.x it
+is part of the official build and no longer part of the local patch.
 
 Battlegrounds recent-games history: Latest Games keeps the compact current-
 session view by default and adds a Wine-compatible Show more games control for
@@ -219,6 +229,9 @@ Full pre-v1.55.6 installation backup:
 
 Full pre-v1.56.1 installation backup:
   /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1561-upgrade-20260819-061202
+
+Full pre-v1.57.6 installation backup:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1576-upgrade-20260904-022058
 
 Full backup before the Comp Guides and overlay lifecycle fix:
   /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-guide-crash-fix-20260819-0554

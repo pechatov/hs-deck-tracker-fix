@@ -1,6 +1,6 @@
 # Hearthstone Deck Tracker под Wine: исправления и обновление
 
-Состояние обновлено 19 августа 2026 года. Этот каталог — автономная документация и набор исходных патчей. Рабочие файлы HDT, Lutris и Hyprland остаются в своих системных каталогах; удаление этого каталога не отключит уже установленный фикс.
+Состояние обновлено 4 сентября 2026 года (HDT v1.57.6). Этот каталог — автономная документация и набор исходных патчей. Рабочие файлы HDT, Lutris и Hyprland остаются в своих системных каталогах; удаление этого каталога не отключит уже установленный фикс.
 
 ## Коротко: что делать обычно
 
@@ -26,7 +26,7 @@
 Нормальный результат для зафиксированной сборки:
 
 ```text
-executable: 1dd610ac626a621d629d775bea21e3df08e89381478d16127b4d234db18bf7b9
+executable: d76cf0a7d6884cc5665a35eccb782ad62d03c1c5b65aed590f666d6515213a5a
 Wine button fix: yes
 fixed overlay geometry: yes
 Wine tooltip zero-state fix: yes
@@ -53,15 +53,16 @@ automatic updates: pinned by Wine compatibility guard
 |---|---|
 | `README.md` | Эта инструкция |
 | `hdt-prelaunch.py` | Точная резервная копия активного pre-launch guard |
-| `hdt-wine-functional.patch` | Текущий единый функциональный source-патч для чистого HDT v1.56.1 |
-| `hdt-wine-functional-v1.56.1.patch` | Версионная копия текущего патча для v1.56.1 |
+| `hdt-wine-functional.patch` | Текущий единый функциональный source-патч для чистого HDT v1.57.6 (только локальные изменения; PR #4741 уже в upstream) |
+| `hdt-wine-functional-v1.57.6.patch` | Версионная копия текущего патча для v1.57.6 |
+| `hdt-wine-functional-v1.56.1.patch` | Историческая копия патча для v1.56.1 (последняя, включающая PR #4741) |
 | `hdt-wine-functional-v1.55.6.patch` | Историческая копия патча для v1.55.6 |
 | `hdt-wine-functional-v1.55.3.patch` | Историческая копия патча для v1.55.3 |
 | `hdt-wine-functional-v1.55.1.patch` | Историческая копия патча для v1.55.1 |
 | `hdt-wine-functional-v1.55.0.patch` | Историческая копия патча для v1.55.0 |
 | `hdt-wine-functional-v1.54.2.patch` | Историческая копия патча для v1.54.2 |
 | `hdt-wine-functional-v1.53.6.patch` | Историческая копия прежнего патча для v1.53.6 |
-| `upstream-pr-4741.patch` | Пять коммитов Wine-фикса кликов из PR #4741 |
+| `upstream-pr-4741.patch` | Пять коммитов Wine-фикса кликов из PR #4741; нужен только для тегов до v1.57.0, в master он включён коммитом `ae406518` |
 | `local-hover-preview.patch` | Только локальная оптимизация hover и размещение превью слева |
 | `local-fixed-overlay-position.patch` | Фиксация всей геометрии overlay после minimize/restore |
 | `local-opacity-mask.patch` | Отключение несовместимой с Wine оконной маски увеличенной карты и Discover/Choose One |
@@ -70,14 +71,15 @@ automatic updates: pinned by Wine compatibility guard
 | `PATCH-MANIFEST.txt` | Краткий исходный манифест установленной сборки |
 | `MATERIALS.md` | Карта всех сохранённых материалов и автономное восстановление |
 | `SHA256SUMS` | Контрольные суммы файлов набора и ключевых рабочих артефактов |
-| `artifacts/hdt-working-v1.56.1-recent-games.tar.zst` | Текущий полный рабочий каталог HDT с историей 20 матчей |
-| `artifacts/hdt-working-v1.56.1-recent-games.contents.sha256` | Хэши всех 168 файлов внутри текущего автономного снимка |
+| `artifacts/hdt-working-v1.57.6-recent-games.tar.zst` | Текущий полный рабочий каталог HDT v1.57.6 с историей 20 матчей |
+| `artifacts/hdt-working-v1.57.6-recent-games.contents.sha256` | Хэши всех 175 файлов внутри текущего автономного снимка |
+| `artifacts/hdt-working-v1.56.1-recent-games.tar.zst` | Исторический полный рабочий каталог HDT v1.56.1 |
 | `artifacts/hdt-working-v1.55.6-recent-games.tar.zst` | Исторический полный рабочий каталог HDT v1.55.6 |
 | `artifacts/hdt-working-v1.55.3-recent-games.tar.zst` | Исторический полный рабочий каталог HDT v1.55.3 с историей 20 матчей |
 | `artifacts/hdt-working-v1.55.3-pre-chat.tar.zst` | Исторический рабочий каталог до экспериментов с чатом и новой истории игр |
 | `config/hearthstone-plus-deck-tracker.yml` | Снимок конфигурации совместной записи Lutris |
 | `config/hearthstone-deck-tracker.yml` | Исторический снимок удалённой отдельной записи HDT; в активную библиотеку не импортировать |
-| `config/hdt-hearthstone-launcher.bat` | Совместный launcher Battle.net + HDT |
+| `config/hdt-hearthstone-launcher.bat` | Совместный launcher Battle.net + HDT (активная копия — `~/.local/share/lutris/scripts/hdt-hearthstone-launcher.bat`; ждёт старт и выход Hearthstone, затем закрывает Battle.net) |
 | `config/nikki-hdt-proxy-domains.list` | Доменные суффиксы сервисов HDT, которые Nikki должен направлять через `PROXY` |
 | `config/hyprland-hdt.conf` | Справочная копия только относящихся к HDT правил Hyprland |
 | `config/wine-taskbar-icons.py` | Резервная копия active class/icon, geometry, routing, chat-focus и lifecycle guard |
@@ -87,17 +89,19 @@ automatic updates: pinned by Wine compatibility guard
 | `config/restart-hs-overlay.desktop` | Видимый пункт «Перезапустить HS Overlay» для Rofi |
 | `assets/hearthstone-waybar.png` | Прозрачный master новой hand-drawn иконки Hearthstone для Waybar |
 
-Текущий единый патч проверен на чистом исходном коммите `00400dbfaf04e6e137893cabf0cb0ad1a4af4d47` (тег `v1.56.1`). Временные изменения проекта, необходимые только для сборки под Wine, и сгенерированные `.resources` в функциональные патчи не включены. Версионные копии прежних патчей сохранены для воспроизведения старых сборок; для текущей v1.56.1 использовать единый патч или `hdt-wine-functional-v1.56.1.patch`. Полный готовый к автономному восстановлению каталог находится в `artifacts/hdt-working-v1.56.1-recent-games.tar.zst`; его состав и порядок применения кратко описаны в `MATERIALS.md`.
+Текущий единый патч проверен на чистом исходном коммите `dbd9af96f68498dab72c67b3bf0267ae93012816` (`master`, сообщение коммита `v1.57.6`; начиная с 1.57.x upstream не публикует git-теги, релизы HDT-Releases собираются из `master`). Wine-фикс кнопок PR #4741 включён в upstream коммитом `ae406518` и в единый патч больше не входит. Временные изменения проекта, необходимые только для сборки под Wine, и сгенерированные `.resources` в функциональные патчи не включены. Версионные копии прежних патчей сохранены для воспроизведения старых сборок; для текущей v1.57.6 использовать единый патч или `hdt-wine-functional-v1.57.6.patch`. Полный готовый к автономному восстановлению каталог находится в `artifacts/hdt-working-v1.57.6-recent-games.tar.zst`; его состав и порядок применения кратко описаны в `MATERIALS.md`.
 
 ## Зафиксированное рабочее состояние
 
-Версия HDT: `1.56.1.7425`.
+Версия HDT: `1.57.6.8270`.
 
 SHA-256 установленного исполняемого файла:
 
 ```text
-1dd610ac626a621d629d775bea21e3df08e89381478d16127b4d234db18bf7b9
+d76cf0a7d6884cc5665a35eccb782ad62d03c1c5b65aed590f666d6515213a5a
 ```
+
+SHA-256 того же exe до применения transparency patch guard-скриптом (результат сборки): `4de74719da41ddba6528086b38741188371fd485b7bca77737ccb1f11f063f1d`.
 
 Основные пути:
 
@@ -141,6 +145,9 @@ Wine prefix:
 Полная резервная копия перед обновлением с v1.55.6 до v1.56.1:
   /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1561-upgrade-20260819-061202
 
+Полная резервная копия перед обновлением с v1.56.1 до v1.57.6:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1576-upgrade-20260904-022058
+
 Полная резервная копия перед исправлением Comp Guides и lifecycle overlay:
   /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-guide-crash-fix-20260819-0554
 
@@ -165,7 +172,7 @@ Desktop entries:
   /home/mike/.local/share/icons/hicolor/*/apps/hearthstone-deck-tracker.png
 ```
 
-Установленный `Hearthstone Deck Tracker.exe` и `untapped-scry-dotnet.dll` сейчас оба PE32+ x86-64. Рабочий snapshot занимает около 76 МБ, архив до исправления — около 19 МБ.
+Установленный `Hearthstone Deck Tracker.exe` и `untapped-scry-dotnet.dll` сейчас оба PE32+ x86-64. Рабочий snapshot занимает около 86 МБ, архив до исправления — около 19 МБ.
 
 ## Какие проблемы были и что исправлено
 
@@ -187,7 +194,7 @@ Desktop entries:
 
 Причиной оказался частично обновлённый каталог: x64 HDT был смешан с x86 `untapped-scry-dotnet.dll`. Трекер запускался, но Scry не мог читать состояние Battlegrounds, поэтому окна оставались пустыми.
 
-Изначально было синхронизировано полное официальное дерево v1.53.6 одной архитектуры. 2 августа 2026 года оно целиком обновлено до v1.54.2, 4 августа — до v1.55.0, 5 августа — до v1.55.1, 10 августа — до v1.55.3, 16 августа — до v1.55.6, а 19 августа — до v1.56.1; после каждого обновления устанавливался функционально исправленный x64 exe из точно того же тега. Guard сравнивает PE machine type главного exe и Scry DLL. Несовпадающее обновление не принимается.
+Изначально было синхронизировано полное официальное дерево v1.53.6 одной архитектуры. 2 августа 2026 года оно целиком обновлено до v1.54.2, 4 августа — до v1.55.0, 5 августа — до v1.55.1, 10 августа — до v1.55.3, 16 августа — до v1.55.6, 19 августа — до v1.56.1, а 4 сентября — до v1.57.6; после каждого обновления устанавливался функционально исправленный x64 exe из точно того же тега. Guard сравнивает PE machine type главного exe и Scry DLL. Несовпадающее обновление не принимается.
 
 Важно: нельзя переносить отдельные DLL между выпусками или копировать старый custom exe поверх произвольного нового набора зависимостей. Обновляется полное дерево одного выпуска, затем для этого же исходного тега собирается custom exe.
 
@@ -195,7 +202,7 @@ Desktop entries:
 
 Стандартные WPF `Button`/`ButtonBase` ненадёжно получают `Click` внутри overlay с `WS_EX_TRANSPARENT` под Wine. Применена серия из пяти коммитов [HearthSim/Hearthstone-Deck-Tracker PR #4741](https://github.com/HearthSim/Hearthstone-Deck-Tracker/pull/4741), итоговый коммит `7b32e0c164b5c751a01a61b8d664320ff4533768`.
 
-Кнопки Battlegrounds заменены на `OverlayButton : Border`, обрабатывающий `MouseLeftButtonUp`. Исправлены вкладки справа, закрепление миньонов, фильтры, comps и связанные элементы. В сборку также входит regression test, запрещающий возврат обычных WPF-кнопок в этих overlay-представлениях.
+Кнопки Battlegrounds заменены на `OverlayButton : Border`, обрабатывающий `MouseLeftButtonUp`. Начиная с v1.57.x этот PR включён в upstream (коммит `ae406518`, `OverlayButton` реагирует на `MouseUp` любой кнопки мыши), поэтому локальный единый патч его больше не содержит. Исправлены вкладки справа, закрепление миньонов, фильтры, comps и связанные элементы. В сборку также входит regression test, запрещающий возврат обычных WPF-кнопок в этих overlay-представлениях.
 
 ### 4. Низкий FPS и нулевое состояние самого tooltip
 
@@ -870,17 +877,29 @@ tar --zstd -xf \
 ```bash
 git clone https://github.com/HearthSim/Hearthstone-Deck-Tracker.git
 cd Hearthstone-Deck-Tracker
-git checkout 00400dbfaf04e6e137893cabf0cb0ad1a4af4d47
+git checkout dbd9af96f68498dab72c67b3bf0267ae93012816
 git apply --check /home/mike/projects/deck-tracker-fix/hdt-wine-functional.patch
 git apply /home/mike/projects/deck-tracker-fix/hdt-wine-functional.patch
 git diff --check
 ```
 
-Единый патч включает PR #4741, hover-оптимизацию, preview слева, фиксированную геометрию overlay, отключение несовместимой оконной opacity mask, постоянную центрально-левую click-through-зону, историю последних 20 игр с финальными билдами, защиту lifecycle overlay и устойчивое состояние Comp Guides при сетевых ошибках. Текущий `hdt-wine-functional.patch` рассчитан на базу v1.56.1; для старых сборок сохранены версионные патчи v1.55.6, v1.55.3, v1.55.1, v1.55.0, v1.54.2 и v1.53.6.
+Единый патч включает hover-оптимизацию, preview слева, фиксированную геометрию overlay, отключение несовместимой оконной opacity mask, постоянную центрально-левую click-through-зону, историю последних 20 игр с финальными билдами, защиту lifecycle overlay, устойчивое состояние Comp Guides при сетевых ошибках и regression-тест на отсутствие обычных WPF `Button` в Battlegrounds overlay. PR #4741 в него больше не входит: upstream включил его в `master` (коммит `ae406518`). Текущий `hdt-wine-functional.patch` рассчитан на базу v1.57.6 (`dbd9af96`); для старых сборок сохранены версионные патчи v1.56.1 (последний с PR #4741), v1.55.6, v1.55.3, v1.55.1, v1.55.0, v1.54.2 и v1.53.6.
 
-### Новый официальный тег
+### Новый официальный выпуск
 
-Сначала проверить, включён ли уже `OverlayButton` в новый выпуск.
+С 1.57.x git-тегов в `HearthSim/Hearthstone-Deck-Tracker` нет: номер выпуска брать из `HearthSim/HDT-Releases`, а базовый коммит — из `master` (сообщение коммита совпадает с номером версии, например `v1.57.6`). Полный номер сборки (`1.57.6.8270`) читать из официального `HearthstoneDeckTracker.exe` внутри `HearthstoneDeckTracker-<версия>-full.nupkg`.
+
+Обычный путь для 1.57.x и новее — перенести текущий единый патч целиком:
+
+```bash
+git checkout <base-commit>
+git apply --3way /home/mike/projects/deck-tracker-fix/hdt-wine-functional.patch
+git diff --check
+```
+
+При обновлении с v1.56.1 на v1.57.6 так конфликтовали только `BattlegroundsCompsGuidesViewModel.cs` (upstream добавил pre-lobby-логику в `OnMatchStart`) и дубль `xmlns:battlegrounds` в `BattlegroundsSession.xaml`.
+
+Для старых тегов сначала проверить, включён ли уже `OverlayButton` в выпуск.
 
 Если Wine-фикс кнопок ещё не вошёл в тег:
 
@@ -923,7 +942,36 @@ Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs
 
 ## Примечания по сборке
 
-Текущая сборка была получена под Wine с Windows .NET SDK 8.0.100 и .NET Framework 4.7.2 reference assemblies. Windows SDK под Wine запускается в PTY с `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1`: без PTY Wine 11.15 не даёт .NET изменить console encoding, а без invariant mode несовпадение системной ICU останавливает `dotnet.exe` до MSBuild. NuGet assets восстанавливаются нативным Linux SDK с `--runtime win7-x64`, затем Windows-сборка выполняется с `--no-restore`: Wine не принимает просроченные подписи исторических NuGet-пакетов. Библиотеки взяты из официального full-пакета v1.56.1. Localization зафиксирован на коммите `e690980437464d8046faeb9debfac9648a2bf1f3`; `Strings.Designer.cs` сгенерирован отдельным build-only инструментом. Для preserialized ресурсов временно использовался `System.Resources.Extensions`; изменение `.csproj` после сборки полностью отменено.
+Текущая сборка была получена под Wine 11.16 (Staging) с Windows .NET SDK 8.0.100 и .NET Framework 4.7.2 reference assemblies. Windows SDK под Wine запускается в PTY с `DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1`: без PTY Wine не даёт .NET изменить console encoding, а без invariant mode несовпадение системной ICU останавливает `dotnet.exe` до MSBuild. NuGet assets восстанавливаются нативным Linux SDK с `--runtime win7-x64`, затем Windows-сборка выполняется с `--no-restore`: Wine не принимает просроченные подписи исторических NuGet-пакетов. Библиотеки взяты из официального full-пакета v1.57.6. Localization зафиксирован на коммите `073618e76c91da02e42a31cc5fd3afd08a5122b7` (HDT-Localization, 3 сентября 2026); файлы `Strings*.resx` копируются из `HDT-Localization/` в `Hearthstone Deck Tracker/Properties/` (это делает Bootstrap на Windows), а `Strings.Designer.cs` сгенерирован отдельным build-only инструментом `~/.cache/hdt-build/StronglyTypedResx.exe`. Для preserialized ресурсов временно использовался `System.Resources.Extensions`; изменение `.csproj` после сборки полностью отменено.
+
+Новое с v1.57.x: вместо SharpRaven используется Sentry 6.9.0, и вместе с ним в компиляцию попадают Roslyn-анализаторы (`Sentry.Compiler.Extensions.dll`, `System.Text.Json.SourceGeneration.dll`). CSC под Wine не находит их по смешанному пути `/home/...\sentry\...`, поэтому после Linux-restore в `obj/project.assets.json` (`packageFolders`, `project.restore.packagesPath`) и `obj/*.nuget.g.props` корень пакетов переписывается на `Z:\home\mike\.cache\hdt-build\nuget-packages`. Обычные reference-DLL работали и со старым путём, ошибка `CS0006` проявляется только на анализаторах.
+
+Последовательность, которой собрана v1.57.6 (пути — как в `~/.cache/hdt-build`):
+
+```bash
+B=~/.cache/hdt-build; NEW=~/projects/Hearthstone-Deck-Tracker-v1.57.6; prefix=$B/prefix
+# 1. официальные DLL того же выпуска в lib/ и resx из HDT-Localization
+rsync -a $B/v1.57.6/unpacked/lib/net472/{BobsBuddy.Common,BobsBuddy,HSReplay,HearthDb,HearthMirror,msvcp140,ucrtbase,vcruntime140,vcruntime140_1}.dll \
+  $B/v1.57.6/unpacked/lib/net472/api-ms-win-crt-*.dll "$NEW/lib/"
+cp "$NEW"/HDT-Localization/Strings*.resx "$NEW/Hearthstone Deck Tracker/Properties/"
+cp "$NEW/CHANGELOG.md" "$NEW/Hearthstone Deck Tracker/Resources/CHANGELOG.md"
+# 2. временные правки csproj: GenerateResourceUsePreserializedResources=true,
+#    PackageReference System.Resources.Extensions 4.7.1,
+#    Condition="'$(SkipGenerateDesignerFiles)' != 'true'" на target BeforeBuildMigrated
+# 3. restore нативным SDK и переписывание корня пакетов на Z:\...
+DOTNET_ROOT=$B/dotnet-linux DOTNET_CLI_HOME=$B/dotnet-home NUGET_PACKAGES=$B/nuget-packages \
+  $B/dotnet-linux/dotnet restore "$NEW/Hearthstone Deck Tracker/Hearthstone Deck Tracker.csproj" --runtime win7-x64 --force --no-cache
+# 4. Strings.Designer.cs
+WINEPREFIX=$prefix wine $B/StronglyTypedResx.exe "$(WINEPREFIX=$prefix winepath -w "$NEW/Hearthstone Deck Tracker/Properties/Strings.resx")" \
+  "$(WINEPREFIX=$prefix winepath -w "$NEW/Hearthstone Deck Tracker/Properties/Strings.Designer.cs")" Hearthstone_Deck_Tracker.Properties Strings
+# 5. сборка в PTY
+script -qfec "env DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1 DOTNET_CLI_HOME='Z:\\home\\mike\\.cache\\hdt-build\\dotnet-home' \
+  NUGET_PACKAGES='Z:\\home\\mike\\.cache\\hdt-build\\nuget-packages' WINEPREFIX=$prefix \
+  wine $B/dotnet-win/dotnet.exe build \"$(WINEPREFIX=$prefix winepath -w "$NEW/Hearthstone Deck Tracker/Hearthstone Deck Tracker.csproj")\" \
+  --configuration Release --property:Platform=x64 --property:BuildNumber=8270 --property:SkipGenerateDesignerFiles=true --no-restore" $B/v1.57.6/build.log
+```
+
+Результат — `Hearthstone Deck Tracker/bin/x64/Release/HearthstoneDeckTracker.exe`; в каталог-кандидат он копируется как `Hearthstone Deck Tracker.exe` поверх полного официального `lib/net472` вместе с `HearthstoneDeckTracker.pdb` и `System.Resources.Extensions.dll`. Тесты `HDTTests` под Wine компилируются, но MSTest-адаптер не обнаруживает тесты (`Set Method not found for 'TargetFrameworkName'`) — так же, как и для v1.56.1; их запуск возможен только на Windows.
 
 В рабочее дерево вместе с exe входят обязательные runtime-файлы:
 
@@ -935,11 +983,13 @@ System.Resources.Extensions.dll
 System.Runtime.CompilerServices.Unsafe.dll
 ```
 
+Начиная с v1.57.6 первые четыре входят в официальный пакет (их байты совпадают с NuGet-версиями из сборки); из сборки добавляется только `System.Resources.Extensions.dll`.
+
 Критически важные условия:
 
 - собирать `Release x64`;
 - использовать зависимости ровно того же выпуска, что и исходники;
-- `AssemblyVersion` и `FileVersion` должны точно совпадать с полным номером из официального exe того же release — для v1.56.1 это `1.56.1.7425`, а не сокращённое `1.56.1`. Иначе скомпилированные WPF pack URI будут ссылаться на другую assembly и приложение упадёт до создания окна overlay;
+- `AssemblyVersion` и `FileVersion` должны точно совпадать с полным номером из официального exe того же release — для v1.57.6 это `1.57.6.8270`, а не сокращённое `1.57.6`. Иначе скомпилированные WPF pack URI будут ссылаться на другую assembly и приложение упадёт до создания окна overlay. С v1.57.x `.csproj` вычисляет обе версии из `<Version>` и свойства `BuildNumber`, поэтому править файл не нужно: достаточно `--property:BuildNumber=8270` (для более старых тегов версию по-прежнему нужно временно прописать в `.csproj`);
 - не переносить временные build-workaround изменения `.csproj` как продуктовый фикс;
 - предпочтительно собирать на Windows/VM с полноценным MSBuild/Visual Studio, где старые генераторы ресурсов поддерживаются штатно.
 
@@ -965,17 +1015,19 @@ install -Dm755 \
 
 ```yaml
 system:
-  prelaunch_command: /home/mike/.local/share/lutris/scripts/hdt-prelaunch.py
+  prelaunch_command: /bin/sh -c "$HOME/.local/share/lutris/scripts/hdt-prelaunch.py"
   prelaunch_wait: true
 ```
 
 Guard намеренно хранится в `~/.local/share/lutris/scripts`, а не в `~/.config/lutris/scripts`: создание второго пути меняет выбранный Lutris корень и может снова скрыть все игровые YAML.
 
-Совместная запись запускает:
+Совместная запись запускает (с 12 августа 2026):
 
 ```text
-/home/mike/Games/hs/battlenet/drive_c/hdt-hearthstone-launcher.bat
+/home/mike/.local/share/lutris/scripts/hdt-hearthstone-launcher.bat
 ```
+
+Копия в `/home/mike/Games/hs/battlenet/drive_c/hdt-hearthstone-launcher.bat` — старый вариант без ожидания Hearthstone; активной записью не используется.
 
 Правила из `config/hyprland-hdt.conf` являются справочной выдержкой. Активные Lua-правила находятся в `~/.config/hypr/user/window_rules.lua`, общие cursor/render-настройки — в `~/.config/hypr/user/settings.lua`; синхронизированные source-копии хранятся под `~/projects/dotfiles/home/.config/hypr/user/`. После восстановления выполнить `hyprctl reload`.
 
