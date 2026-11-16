@@ -1,0 +1,26 @@
+{
+  "matched": 2298,
+  "changed": [
+    "Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Composition/BattlegroundsCompositionStatsBar.xaml.cs",
+    "Hearthstone Deck Tracker/FlyoutControls/Options/Tracker/TrackerSystem.xaml",
+    "Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs",
+    "Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Composition/BattlegroundsCompositionStatsRowViewModel.cs",
+    "Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs",
+    "Hearthstone Deck Tracker/Hearthstone/CounterSystem/Counters/InfestTheSculleryCounter.cs",
+    "Hearthstone Deck Tracker/Hearthstone/Watchers.cs",
+    "Hearthstone Deck Tracker/Core.cs",
+    "Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Tier7/Tier7PreLobbyViewModel.cs",
+    "Hearthstone Deck Tracker/SceneHandler.cs",
+    "Hearthstone Deck Tracker/GameEventHandler.cs",
+    "Hearthstone Deck Tracker/Hearthstone/RelatedCardsSystem/Cards/Druid/InfestTheScullery.cs",
+    "Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsGameViewModel.cs",
+    "Hearthstone Deck Tracker/Config.cs",
+    "Hearthstone Deck Tracker/FlyoutControls/Options/Tracker/TrackerSystem.xaml.cs",
+    "Hearthstone Deck Tracker/Windows/OverlayWindow.xaml.cs"
+  ],
+  "missing": [
+    "hearthstone deck tracker/properties/strings.designer.cs"
+  ],
+  "public_commit": "b8f67044d5d02a85e7ad7bf4e8b14da8dd30d36e",
+  "release_commit": "484c3dfabdd1b640ff486d9b3ab9fce908230474"
+}

@@ -1,0 +1,17 @@
+{
+  "version": "1.58.9.9009",
+  "upstream_commit": "d63bb80af46ff61cc37d3917aa760133172b4b12",
+  "localization_commit": "d589e572fb71dea3638f5d8aee65411014003265",
+  "exe_sha256": "4979b9d25212d303490d8b7dc06d52e7b20b8dbd9d7f54b2a20b6c2c5ce12182",
+  "built_sha256": "6fc07b9273603ddac184ea10d88f3c5c445f6dbde692a69bc91c8dfe4845fc44",
+  "official_sha256": "6e66c1c2ee9efec7a3aea6782ef38b22af6fff2bb14e8d73db168b4614c48675",
+  "package_sha256": "bfad3a0b707d15f5ff0f6014bf1a981686280fc37ae24c51ea2bccd4d3c411fd",
+  "archive_sha256": "ed31c44215b843dd19d91cfefd728b99b65cf64feb5f11311f141336c1ae68ee",
+  "manifest_sha256": "e0cc790cb22c2dd5179012e7e082c0e280f84701faa2d9bd3d2a0c17c16d9fc7",
+  "files": 174,
+  "backup": "/home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1589-upgrade-20261007-002510",
+  "regression_tests_passed": 15,
+  "official_dlls_unchanged": 69,
+  "installation_mode": "source build with official release dependencies",
+  "game_running_at_deployment": false
+}

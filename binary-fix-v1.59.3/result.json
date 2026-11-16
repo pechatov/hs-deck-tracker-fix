@@ -1,0 +1,19 @@
+{
+  "version": "1.59.3.9015",
+  "upstream_commit": null,
+  "donor_commit": "555499e632ee5027032c94068a86819b6c94b087",
+  "localization_commit": "e1411841bec3ccad4cfb575e970fa136fdd10b7c",
+  "exe_sha256": "baed81f85e97003be8ecb71a34298044068a8851153071f12cd9857fcf67111e",
+  "woven_sha256": "ed31f66f2ad899ed0c863bd6017bd6485576c385d8fa9d5935b4a1ba227f61c1",
+  "official_sha256": "f1e515eb9770870d22664c3be1c08ba218fd3db508d13a31f1edf16dadf85943",
+  "package_sha256": "9278d4f043d693c02d773c2b01ff7fecdaeea9723cdf7a9388f06ed8f7ed8a0b",
+  "archive_sha256": "5fca5dce0a8fba43b9fd6c9065f17231ab5f1c25adad487f4db0ee73793cdca7",
+  "manifest_sha256": "bde7773a040d59224354164000f83e3240af8d4b67640c65138c883a4beaaa3b",
+  "files": 172,
+  "backup": "/home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1593-upgrade-20261018-203854",
+  "regression_tests_passed": 15,
+  "jit_methods_prepared": 80,
+  "official_dlls_unchanged": 69,
+  "installation_mode": "official release with verified IL and BAML patches",
+  "game_running_at_deployment": false
+}

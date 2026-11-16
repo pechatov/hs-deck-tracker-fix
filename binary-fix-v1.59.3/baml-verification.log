@@ -1,0 +1,5 @@
+All three target BAML resources match the clean baseline.
+Patched controls/overlay/battlegrounds/minions/battlegroundscardsgroup.baml
+Patched controls/overlay/battlegrounds/session/battlegroundssession.baml
+Patched controls/tooltips/cardtooltip.baml
+408 official resources preserved byte-for-byte.

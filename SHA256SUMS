@@ -1,6 +1,16 @@
-561688aef1443e800895ae48e9ee5a627162be438097e3fda55d109552010516  ./PATCH-MANIFEST.txt
-04cffa7af2b5b3c81f128b5e998b73b0ed52ce43c111c8ce4b29e3ebe4acb6a6  ./README.md
-5751160c1cf916a997e05bfd419766a7d0c4b8949001dc9b15c021a94e4839eb  ./MATERIALS.md
+2fe1268cac1998f4fb7ab82f77043b50e89fa0b907b7052b89b6d140b5ea803b  ./PATCH-MANIFEST.txt
+f0580b89daaf51ce89d7e02c33e664ec1011dfe59856c56637c48d1a30935dde  ./README.md
+b56a14ffc284018fbc66854b20125694e2004bb5a42a2c7c7d56bef74c1062fe  ./MATERIALS.md
+f80b5fc404ab4179b17e73dee9e66b5bd2bcc71240791bff43a94a8db963b77e  ./artifacts/hdt-working-v1.58.2-recent-games.tar.zst
+f8e5c65e260f14f15172898aa335184eaade00b1469b50d01a85e6a21aaa17ce  ./artifacts/hdt-working-v1.58.2-recent-games.contents.sha256
+15d87a1e82b413861f5c7e2f15f6a8184599aa0efed9da16090a2dd686f999e6  ./artifacts/hdt-working-v1.58.0-recent-games.tar.zst
+346b9f30d507190afbe521d4eae562a5dad6feb9499d303e3f4d29dda0d4d7a0  ./artifacts/hdt-working-v1.58.0-recent-games.contents.sha256
+71361d115f1ba9404586a34bc8db47a127db5180d41ae960da6125c8d47f3b02  ./artifacts/hdt-working-v1.57.12-recent-games.tar.zst
+07a5df9c6d260fd29e103d72358de0d05e5b4f836ac53651f922350ff041852c  ./artifacts/hdt-working-v1.57.12-recent-games.contents.sha256
+30e9d9276a1ac38c8022f9d0f4832dfe39fdbd6fc5b59c2c851e600c62eebc4d  ./artifacts/hdt-working-v1.57.10-recent-games.tar.zst
+39f0221a9c44d698acf6379bf3ca453f90de7064c07bc055f2ca335f0194f4a9  ./artifacts/hdt-working-v1.57.10-recent-games.contents.sha256
+23cf588e3c6941d6bb7c862aac134f9071876ee7185af02ee8f997ab779d932d  ./artifacts/hdt-working-v1.57.6-recent-games.tar.zst
+a5fc48b53aa7609c1156615ce9421294bd33187003f89b1a12013c1b46b0f4f8  ./artifacts/hdt-working-v1.57.6-recent-games.contents.sha256
 73f0f73336341202cd81e7845a9f7ab8f615e2eeaa1bff65d4e27eee49439765  ./artifacts/hdt-working-v1.56.1-recent-games.tar.zst
 cccc7f0a5ecd2d3cf558dfe0b7dbf641be59335a6b894d6bb496dc240fd069a7  ./artifacts/hdt-working-v1.56.1-recent-games.contents.sha256
 9c7fec50a8ffebab52ea5bf54e2f57b3b609f12d086ba8e71eaa59a957a462bb  ./artifacts/hdt-working-v1.55.6-recent-games.tar.zst
@@ -10,9 +20,9 @@ cccc7f0a5ecd2d3cf558dfe0b7dbf641be59335a6b894d6bb496dc240fd069a7  ./artifacts/hd
 683ffac0865048df698bcaad4c7ffdfac03184f375c97ed7de69334a3cd0b8ea  ./artifacts/hdt-working-v1.55.3-pre-chat.tar.zst
 6822a00ecac75455d81efc03b50a39eb3248bc5b7b1087bdf757da6545eba1bb  ./artifacts/hdt-working-v1.55.3-pre-chat.contents.sha256
 4e11aa5139170c3f99c4de57a35764c2c2ead653d220ca4d1bb71d282b46ad13  ./assets/hearthstone-waybar.png
-a9422878f0afbb6174d6ff6158ae31673fedeefb633681cd411b9f68ceb87dcc  ./config/hdt-hearthstone-launcher.bat
+67fe68c37019e6e4a8c3e20f524cd03f7ab13c981ec4fae398b5837e80e16ee9  ./config/hdt-hearthstone-launcher.bat
 b22a6bf0763c3e97274d48acf4d47414c7f0b0a3888194460bb5b611f7cdf1e8  ./config/hearthstone-deck-tracker.yml
-16a5ae0b674a1eaa720787f56c5ba58b4ce4993212bcb2466e6e02225b6c78c1  ./config/hearthstone-plus-deck-tracker.yml
+4eba99dd3317583f8888e8e9e478e6ff5859899a20cc964a4c102ebb8ae8c633  ./config/hearthstone-plus-deck-tracker.yml
 75108eb52aeafb504ed550f80373b2155f104a493e47c382e492c4bc71f76852  ./config/nikki-hdt-proxy-domains.list
 8cc188a37f62ea89af9725575807aba99e248f0459ed0b892240777005c80bd9  ./config/hyprland-hdt.conf
 307a07fd6a3ff2dd9ee3a2d607b4076e7742c857a6ff217c97ce07d0664710b1  ./config/wine-taskbar-icons.py
@@ -21,7 +31,7 @@ bd43859e221fcb3350abbbd4644c8ab8dabfa08010125b8fd8c4a7e6182e8584  ./config/heart
 080f5d2e8344dc4fb9917bcf09af11045d08b45127e23b8862dba29c2c8a9605  ./config/restart-hs-overlay
 f99351ab66b7c83f238f8a7243b1cc04f5d3b49b4d86fc0d7e06fda53edafece  ./config/restart-hs-overlay.desktop
 2bb41d79d16ea8a27d362a9221981bd2bcc8b190e0b1b92784389b4364ce29f6  ./hdt-prelaunch.py
-8d3d318d23230a418d32dba4cf6b90e34735f8603a5b13141b300b4ce61e2b15  ./hdt-wine-functional.patch
+d2b424aa7483ffd4c8388447d2f1a2ac00811cf308c97ef3832341a66b4a41b6  ./hdt-wine-functional.patch
 6986c85bd33971d91c997d2d67aebd3594dc9840475fea1a788401da31d7ed3d  ./hdt-wine-functional-v1.53.6.patch
 1c5492ed4b378dcef37acce6a1b952ea6f05ca8b5331648ce35f397f6d163bbb  ./hdt-wine-functional-v1.54.2.patch
 1c5492ed4b378dcef37acce6a1b952ea6f05ca8b5331648ce35f397f6d163bbb  ./hdt-wine-functional-v1.55.0.patch
@@ -29,19 +39,85 @@ f99351ab66b7c83f238f8a7243b1cc04f5d3b49b4d86fc0d7e06fda53edafece  ./config/resta
 385010d9c6123319c72c17bf5067c709b6c13a84c803ebf258a3c981cd1fee1e  ./hdt-wine-functional-v1.55.3.patch
 ca8d44b2867068b8f77cfbf7bd7de0280620e7d3785b9980a2d98995a87c89e0  ./hdt-wine-functional-v1.55.6.patch
 8d3d318d23230a418d32dba4cf6b90e34735f8603a5b13141b300b4ce61e2b15  ./hdt-wine-functional-v1.56.1.patch
+9ff98ba4844670111b06f7593988a721f041e39b580d30be24b8b57109a1cf97  ./hdt-wine-functional-v1.57.6.patch
+200e8cd07617da5ee937d8fedac762db37348aa6f8439b4c801266da69402ad9  ./hdt-wine-functional-v1.57.10.patch
+766405d243f7f0aa6cd19041fd588cc9ef66f4822fee2e18679f7fa15bcae72f  ./hdt-wine-functional-v1.57.12.patch
+e1f94391189b7b12924f410420eb823a5d7c8eded09ee910878000a51646ad70  ./hdt-wine-functional-v1.58.0.patch
+0b7625bfbf0c91b10d623acba8de0e29ca8acb98445a1f1b8a226c8c8be9c51c  ./hdt-wine-functional-v1.58.2.patch
 7fc58393a88ab02ef63f6ae249ee893e646ca9fe3c0c179cc17935b02a8a4b50  ./local-clickthrough-zone.patch
 154983ed863b0cd04d4a98a292d75f048f930d383793e89de6e8b1249356e680  ./local-fixed-overlay-position.patch
 0f5963533e9262757bc3797644eeb222cccd175850a7082a8e30d3c33ffb7bdf  ./local-hover-preview.patch
 13403b5aa3b0283117602c73c57b9d2f67958aec58c0ea21e10fd8df17f91465  ./local-opacity-mask.patch
 b11f715d1bea15ea8015d0d4df8658cacfc00f7f42da99027cc1dc85e7a2e5c1  ./local-recent-games.patch
 89bed78a85d5ae8e1be20e44cdf59ba1d36a133b650fe26c4b29a4c91fa96d78  ./upstream-pr-4741.patch
+7298444dbf1960b46dac80dac3bfd1287ca5819f678f41cc7f9e7f5cf6ef8dfe  ./hdt-wine-functional-v1.58.5.patch
+c003dd046d8685f283abfd9d3a050cdb775ea525e49bfec50d7b500caab6a5ce  ./artifacts/hdt-working-v1.58.5-recent-games.tar.zst
+bcc9ca9d74b3d87ed447787d0bf9bd762208fad22a932f28b6f9f0b4aee6e69f  ./artifacts/hdt-working-v1.58.5-recent-games.contents.sha256
+c40c541c53ee64eea4c5dac3070cb78bbbc802206789cd141c16516a057d7ff0  ./hdt-wine-functional-v1.58.6-donor.patch
+a4b173f29c32b41a7dd0f5d8029d5d3150aa1139fe82d4bebf7237b347147e51  ./artifacts/hdt-working-v1.58.6-recent-games.tar.zst
+7c339be04a84150059fe274c10223d039270954b55fc1b43a47f17d95f98607d  ./artifacts/hdt-working-v1.58.6-recent-games.contents.sha256
+27980695aef86dcc88b4f99e943b8cfe76b13037f12551fbff2c27f5d5260d1a  ./binary-fix-v1.58.6/MergeBamlResources.cs
+7a4a1818cff9ee63e715a1c23a06664ea52e30233673622304a4e1cb54675bcd  ./binary-fix-v1.58.6/PrepareWineMethods.cs
+377888ebdb4ca2a09cfba9aa6ff61687e18ee27acaa3894b803fa44149e616dc  ./binary-fix-v1.58.6/Program.cs
+cd9d4b73fb61ae0511a803cb854964dd787367232758e5bc0e34949e5af05b1a  ./binary-fix-v1.58.6/README.md
+9d76a675c0a57844e38b57ac7b79554e036b114b28f3fc0d57fa31b651a2ded7  ./binary-fix-v1.58.6/Weave.cs
+b7597dc225ed1acf73f4e47268e398d8fe4524a7f5ff5674c0822bf155a72fb8  ./binary-fix-v1.58.6/binary-verification.json
+a6e9118bd9791c2f7c930013407dabd3b04135c7a26a58cd80c58e4be46e9394  ./binary-fix-v1.58.6/jit-verification.log
+67c39031fc9b3e7128e5cee90f58656a02f27e1782d35d1189802648b161cf5f  ./binary-fix-v1.58.6/regression-tests.log
+a90a9b19a47a03ddb4cfcf5a6d78bc7ac2a865503a0f25c0cb892b5ca1a31573  ./binary-fix-v1.58.6/result.json
+21f61c6e099a785c2614a22e7b968b0dad09d2ecaa4f2b743650b2452723b6be  ./binary-fix-v1.58.6/source-verification.json
+8385d5c161e070ea6264415ac9702d7994c3c4c6b62dfd18dc508120b5ca4a49  ./binary-fix-v1.58.6/weave-audit.json
+9753c60c91acaa386dacea8adda9a07276ff5a8d13a3b130274152879719b702  ./binary-fix-v1.58.6/weaver.csproj
+c1086e366bfe8694bc055807244e5ce6c158a5fe1209fcb804c16aadf20a32b7  ./hdt-wine-functional-v1.58.9.patch
+ed31c44215b843dd19d91cfefd728b99b65cf64feb5f11311f141336c1ae68ee  ./artifacts/hdt-working-v1.58.9-recent-games.tar.zst
+e0cc790cb22c2dd5179012e7e082c0e280f84701faa2d9bd3d2a0c17c16d9fc7  ./artifacts/hdt-working-v1.58.9-recent-games.contents.sha256
+613ecc85496f864535b88056a57480329398907d598234e08e678568335c5241  ./build-v1.58.9/README.md
+708499c08caeb2e044c2635f32fa64156745c2561f69c9cdb1307ea57f6bdb5f  ./build-v1.58.9/RunRegressionTests.cs
+e1b7590c38cff01c480fe66973037fec22faeaf431ced8cce3dcd3ca56b86b5f  ./build-v1.58.9/regression-tests.log
+456f8d41cbbae86d89756678db097095662f55ba69566c0418e678f0bf17c374  ./build-v1.58.9/result.json
+8425f46da1f5979d79bdcb1c1dae8251bf4189f37806fed78ec97051a4ba97c4  ./binary-fix-v1.59.3/MergeBamlResources.cs
+7a4a1818cff9ee63e715a1c23a06664ea52e30233673622304a4e1cb54675bcd  ./binary-fix-v1.59.3/PrepareWineMethods.cs
+377888ebdb4ca2a09cfba9aa6ff61687e18ee27acaa3894b803fa44149e616dc  ./binary-fix-v1.59.3/Program.cs
+444877931e931491ebbb1183990d00fbfa14b8bc53ad942eec7fe4cdb67dd2c3  ./binary-fix-v1.59.3/README.md
+708499c08caeb2e044c2635f32fa64156745c2561f69c9cdb1307ea57f6bdb5f  ./binary-fix-v1.59.3/RunRegressionTests.cs
+bd5ff4233c74cc87caf2420133324181597521480aa13898bc02155e1521c2e1  ./binary-fix-v1.59.3/Weave.cs
+eda48f06c1f7d42aaf0dda831b8896e2fdf61c0d7623be9f7501b9b5d2c4240f  ./binary-fix-v1.59.3/baml-verification.log
+5125321ee1a1519cc6d9f064f577fa56d482098ddc9c72c35224e1975dcdfbc5  ./binary-fix-v1.59.3/binary-verification.json
+e2179f0827a4f758efd428265cd3f134d4225eb73c186a2c6436065275e28862  ./binary-fix-v1.59.3/guard.log
+740a211313d73e1877fd4699fb5b7e31d8f25c92a928f2400587f71f0a4bf256  ./binary-fix-v1.59.3/jit-verification.log
+e1b7590c38cff01c480fe66973037fec22faeaf431ced8cce3dcd3ca56b86b5f  ./binary-fix-v1.59.3/regression-tests.log
+129c32d7caed512b3cb08507226c523b95985fdd8dcc619ce8609e8bea4cfcce  ./binary-fix-v1.59.3/result.json
+908a177b0aa5d5721a9a8438d31d1941d14c9e4ddfeae4c16580a43f96f6f280  ./binary-fix-v1.59.3/startup-verification.json
+107cac5aaf370bd318c384e4d58d56b8ed40810b3eba3641df15fa6cf8187429  ./binary-fix-v1.59.3/verify-binary.py
+441ab5e303e88532b56fa8b29966f58e86ad8a26777cc30d84e4509523579a39  ./binary-fix-v1.59.3/weave-audit.json
+9753c60c91acaa386dacea8adda9a07276ff5a8d13a3b130274152879719b702  ./binary-fix-v1.59.3/weaver.csproj
+e91dbb7db89ce88ef1649b985c4b7d7ba6c7184cfec3c5c7c07bb0881df7ae8c  ./hdt-wine-functional-v1.59.3-donor.patch
+5fca5dce0a8fba43b9fd6c9065f17231ab5f1c25adad487f4db0ee73793cdca7  ./artifacts/hdt-working-v1.59.3-recent-games.tar.zst
+bde7773a040d59224354164000f83e3240af8d4b67640c65138c883a4beaaa3b  ./artifacts/hdt-working-v1.59.3-recent-games.contents.sha256
 
-# Внешнее рабочее состояние на 2026-08-19; эти хэши закономерно изменятся
+d2b424aa7483ffd4c8388447d2f1a2ac00811cf308c97ef3832341a66b4a41b6  ./hdt-wine-functional-v1.59.8.patch
+9e3b947d4315bd0b95355ae73ba3990a5599a0fb40968631a1716779a6ceae08  ./build-v1.59.8/README.md
+708499c08caeb2e044c2635f32fa64156745c2561f69c9cdb1307ea57f6bdb5f  ./build-v1.59.8/RunRegressionTests.cs
+eb40cd1756e33e99a4d359bcdf5bc2833712e06eca61277925365a1d2d62bb76  ./build-v1.59.8/guard.log
+e1b7590c38cff01c480fe66973037fec22faeaf431ced8cce3dcd3ca56b86b5f  ./build-v1.59.8/regression-tests.log
+a6ec692e71a9fab310c6da9ceb047ff1c1360422ffb8203e86266645c01544ac  ./build-v1.59.8/result.json
+4101a5a5bb2152289c1eb7267745df7ad9de5a844a3bbc5a529c940fd516d8c8  ./build-v1.59.8/source-verification.json
+d7597aca3cba78aecdfbd1f6a87ea7a7fbe8ffafefe0dc477f5d08056d67923c  ./build-v1.59.8/startup-verification.json
+a273410503d367e337d35100a0dae1767a26cbc4d776cb13a450bb8e174a04be  ./artifacts/hdt-working-v1.59.8-recent-games.tar.zst
+1f493a0ccec575259fead5dc9b1ec97d1cee2070652026a20e8c6996835c2f7e  ./artifacts/hdt-working-v1.59.8-recent-games.contents.sha256
+
+# Внешнее рабочее состояние на 2026-11-04; эти хэши закономерно изменятся
 # после принятого контролируемого обновления и не проверяются sha256sum -c:
-# 1dd610ac626a621d629d775bea21e3df08e89381478d16127b4d234db18bf7b9  installed Hearthstone Deck Tracker.exe
-# 1dd610ac626a621d629d775bea21e3df08e89381478d16127b4d234db18bf7b9  working-current-wine/Hearthstone Deck Tracker.exe
+# 46e5e17c3bc709da15baae36ecd544eefbb4aa665b38cbbf58b614a24897e07b  installed Hearthstone Deck Tracker.exe
+# 46e5e17c3bc709da15baae36ecd544eefbb4aa665b38cbbf58b614a24897e07b  working-current-wine/Hearthstone Deck Tracker.exe
 # 2bb41d79d16ea8a27d362a9221981bd2bcc8b190e0b1b92784389b4364ce29f6  active ~/.local/share/lutris/scripts/hdt-prelaunch.py
 # 080f5d2e8344dc4fb9917bcf09af11045d08b45127e23b8862dba29c2c8a9605  active ~/.local/bin/restart-hs-overlay
 # 307a07fd6a3ff2dd9ee3a2d607b4076e7742c857a6ff217c97ce07d0664710b1  active ~/.config/waybar/scripts/wine-taskbar-icons.py
-# f99351ab66b7c83f238f8a7243b1cc04f5d3b49b4d86fc0d7e06fda53edafece  active restart-hs-overlay.desktop
-# e1e6203c5c4be1cedad76f8e20a4e77a8dc8d0747bf681f9d3feeeadb3d2df1f  hdt-before-bg-fix-20260710-1136.tar.zst
+# f99351ab66b7c83f238f8a7243b1cc04f5d3b49b4d86fc0d7e06fda53edafece  active ~/.local/share/applications/restart-hs-overlay.desktop
+# 67fe68c37019e6e4a8c3e20f524cd03f7ab13c981ec4fae398b5837e80e16ee9  active ~/.local/share/lutris/scripts/hdt-hearthstone-launcher.bat
+85b3ad58ca9b66743cf566d9de0fd89aa2a7d9495cfec7b09818256a3e078bf2  ./config/NomisKitchenHDT.config.json
+287f1c67647d298c9a314415edbffc1d17ec28883356a4bc438989806a972de5  ./config/nomis-plugins.xml
+c1e7190ad1da4e1010584f1fb1de5ecd74f70ee407ee1a140acdf268972a4eea  ./config/nomis-doorstop.ini
+8443d78f427027c263511cf66eec454ddf96dee397d042b4f8e00673d3653719  ./config/nomis-bepinex/BepInEx.cfg
+039ba2ef17ddab7a151106063daa13639c8724a5fcc8de0d98b16fa0d27dc1c7  ./config/nomis-bepinex/com.community.hs.NomiCantDance.cfg
+98efcdce4c6f52e67e6f10d5de5cdf04741b282ef4103916f5bd320406a3ee7b  ./config/nomis-bepinex/com.community.hs.NomisKitchenApm.cfg
