@@ -200,7 +200,7 @@ index 00000000..c99a1830
 +	}
 +}
 diff --git a/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs b/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs
-index 86d55dcc..4ae371a2 100644
+index 158a3cd0..b5d7f424 100644
 --- a/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs	
 +++ b/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs	
 @@ -5,6 +5,8 @@ using System.Linq;
@@ -212,16 +212,16 @@ index 86d55dcc..4ae371a2 100644
  using System.Windows.Input;
  using System.Windows.Media.Animation;
  using Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Minions;
-@@ -70,6 +72,8 @@ public partial class AnimatedCard : IPoolItem, IDisposable, INotifyPropertyChang
- 			return;
- 		_tileIsBattlegrounds = useBattlegroundsTile;
- 		TileHost.Content = useBattlegroundsTile ? new BattlegroundsCardTile() : (object)new CardTile();
+@@ -76,6 +78,8 @@ public partial class AnimatedCard : IPoolItem, IDisposable, INotifyPropertyChang
+ 			OverlayExtensions.SetToolTip(Grid, typeof(CardTooltip));
+ 		else
+ 			Grid.ClearValue(OverlayExtensions.ToolTipProperty);
 +		if(TileHost.Content is DependencyObject tile)
 +			ToolTipService.SetPlacement(tile, _cardTooltipPlacement);
  	}
  
  	public void Update(Hearthstone.Card card, bool showTier7InspirationBtn = false, bool showDeckListFeatures = true, bool useBattlegroundsTile = false)
-@@ -128,6 +132,18 @@ public partial class AnimatedCard : IPoolItem, IDisposable, INotifyPropertyChang
+@@ -134,6 +138,19 @@ public partial class AnimatedCard : IPoolItem, IDisposable, INotifyPropertyChang
  
  	public Hearthstone.Card? Card => DataContext as Hearthstone.Card;
  
@@ -232,6 +232,7 @@ index 86d55dcc..4ae371a2 100644
 +		set
 +		{
 +			_cardTooltipPlacement = value;
++			ToolTipService.SetPlacement(Grid, value);
 +			if(TileHost.Content is DependencyObject tile)
 +				ToolTipService.SetPlacement(tile, value);
 +		}
@@ -241,7 +242,7 @@ index 86d55dcc..4ae371a2 100644
  	public CardTileViewModel? CardTileViewModel
  	{
 diff --git a/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs b/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs
-index 4341f47f..615a63cf 100644
+index e89c8824..41f0e741 100644
 --- a/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs	
 +++ b/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs	
 @@ -42,6 +42,8 @@ public partial class AnimatedCardList
@@ -253,7 +254,7 @@ index 4341f47f..615a63cf 100644
  	private Func<Hearthstone.Card, IEnumerable<Hearthstone.Card>, HighlightColor>? _shouldHighlightCard;
  	public Func<Hearthstone.Card, IEnumerable<Hearthstone.Card>, HighlightColor>? ShouldHighlightCard
  	{
-@@ -189,6 +191,7 @@ public partial class AnimatedCardList
+@@ -200,6 +202,7 @@ public partial class AnimatedCardList
  	private AnimatedCard GetAnimatedCard(Hearthstone.Card card)
  	{
  		var animatedCard = _animatedCardPool.GetOrCreate(card.Id);
@@ -262,10 +263,10 @@ index 4341f47f..615a63cf 100644
  		animatedCard.ShowPinButton = ShowPinButton;
  		animatedCard.MaxHeight = ViewModel.MaxHeightCard;
 diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Guides/BattlegroundsCompsGuidesViewModel.cs b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Guides/BattlegroundsCompsGuidesViewModel.cs
-index 56c1f57a..7d22af89 100644
+index 878eb955..b73b8dcf 100644
 --- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Guides/BattlegroundsCompsGuidesViewModel.cs	
 +++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Guides/BattlegroundsCompsGuidesViewModel.cs	
-@@ -128,7 +128,10 @@ public class BattlegroundsCompsGuidesViewModel : ViewModel
+@@ -129,7 +129,10 @@ public class BattlegroundsCompsGuidesViewModel : ViewModel
  		try
  		{
  			var compsData = await ApiWrapper.GetCompsGuides(Helper.GetCardLanguage());
@@ -277,8 +278,8 @@ index 56c1f57a..7d22af89 100644
  				.OrderBy(comp => comp.Name)
  				.Select(comp => new BattlegroundsCompGuideViewModel(comp, IsPreLobby))
  				.ToList();
-@@ -165,7 +168,7 @@ public class BattlegroundsCompsGuidesViewModel : ViewModel
- 				: await HSReplayNetOAuth.MakeRequest(c => c.GetTier7CompsGuides(Helper.GetCardLanguage(), currentRaces));
+@@ -151,7 +154,7 @@ public class BattlegroundsCompsGuidesViewModel : ViewModel
+ 				: await HSReplayNetOAuth.MakeRequest(c => c.GetTier7CompsGuides(parameters));
  
  			if(compsData?.ByTier == null)
 -				return null;
@@ -286,7 +287,7 @@ index 56c1f57a..7d22af89 100644
  
  			var result = new Dictionary<int, TieredComps>();
  
-@@ -247,17 +250,25 @@ public class BattlegroundsCompsGuidesViewModel : ViewModel
+@@ -250,17 +253,25 @@ public class BattlegroundsCompsGuidesViewModel : ViewModel
  			SelectedComp = null;
  		}
  
@@ -330,10 +331,10 @@ index 0848df13..5f6d33bd 100644
          </Grid>
      </Border>
 diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml
-index 21f250e2..67e0826b 100644
+index aa531fef..bb41af74 100644
 --- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml	
 +++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml	
-@@ -332,6 +332,33 @@
+@@ -331,6 +331,33 @@
                              </ItemsPanelTemplate>
                          </ItemsControl.ItemsPanel>
                      </ItemsControl>
@@ -368,7 +369,7 @@ index 21f250e2..67e0826b 100644
              </StackPanel>
              <battlegrounds:OverlayButton
 diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs
-index 131b05dc..193ad9bf 100644
+index 7400108b..e8381ff8 100644
 --- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs	
 +++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs	
 @@ -5,9 +5,11 @@ using System.Linq;
@@ -383,29 +384,26 @@ index 131b05dc..193ad9bf 100644
  using Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Composition;
  using Hearthstone_Deck_Tracker.Enums.Hearthstone;
  using Hearthstone_Deck_Tracker.Hearthstone;
-@@ -29,7 +31,13 @@ namespace Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session;
- 
- public class BattlegroundsSessionViewModel : ViewModel
- {
+@@ -37,6 +39,12 @@ public class BattlegroundsSessionViewModel : ViewModel
+ 		HSReplayNetOAuth.LoggedOut += UpdateCompositionStatsVisibility;
+ 		Tier7Trial.OnStatusUpdated += UpdateCompositionStatsVisibility;
+ 	}
 +	internal const int SessionGamesLimit = 8;
 +	internal const int RecentGamesLimit = 20;
 +
- 	private readonly BattlegroundsDb _db = BattlegroundsDbSingleton.Instance;
 +	private List<GameItem> _sessionGames = new();
 +	private List<GameItem> _recentGames = new();
 +	private bool _showRecentGames;
  
  	public ObservableCollection<Race> AvailableMinionTypes { get; } = new();
  	public ObservableCollection<Race> BannedMinionTypes { get; } = new();
-@@ -352,29 +360,65 @@ public class BattlegroundsSessionViewModel : ViewModel
+@@ -415,28 +423,64 @@ public class BattlegroundsSessionViewModel : ViewModel
  			.ToList();
  		DeleteOldGames(sortedGames);
  
 -		var sessionGames = GetSessionGames(sortedGames, Core.Game.BattlegroundsRatingInfo, duos);
--		var firstGame = sessionGames.FirstOrDefault();
 +		_sessionGames = GetSessionGames(sortedGames, Core.Game.BattlegroundsRatingInfo, duos);
 +		_recentGames = GetMostRecentGames(sortedGames, RecentGamesLimit);
-+		var firstGame = _sessionGames.FirstOrDefault();
  
 -		SessionGames.Clear();
 -		sessionGames
@@ -421,7 +419,7 @@ index 131b05dc..193ad9bf 100644
 +
 +		Core.Windows.BattlegroundsSessionWindow.UpdateBattlegroundsSessionLayoutHeight();
 +
-+		return firstGame;
++		return _sessionGames;
 +	}
 +
 +	internal static List<GameItem> GetMostRecentGames(List<GameItem> sortedGames, int limit) =>
@@ -431,14 +429,14 @@ index 131b05dc..193ad9bf 100644
 -			.ToList()
 -			.ForEach(AddOrUpdateGame);
 +			.ToList();
-+
+ 
+-		GridHeaderVisibility = sessionGames.Count > 0
 +	private void UpdateDisplayedGames()
 +	{
 +		var games = _showRecentGames
 +			? _recentGames
 +			: GetMostRecentGames(_sessionGames, SessionGamesLimit);
- 
--		GridHeaderVisibility = sessionGames.Count > 0
++
 +		SessionGames.Clear();
 +		games.ForEach(AddOrUpdateGame);
 +
@@ -455,7 +453,7 @@ index 131b05dc..193ad9bf 100644
 +		OnPropertyChanged(nameof(ShowMoreGamesButtonText));
 +	}
  
--		return firstGame;
+-		return sessionGames;
 +	private void ToggleRecentGames()
 +	{
 +		_showRecentGames = !_showRecentGames;
@@ -474,7 +472,7 @@ index 131b05dc..193ad9bf 100644
  	internal static List<GameItem> GetSessionGames(List<GameItem> sortedGames, BattlegroundRatingInfo? ratingInfo, bool duos)
  	{
  		DateTime? sessionStartTime = null;
-@@ -421,12 +465,28 @@ public class BattlegroundsSessionViewModel : ViewModel
+@@ -483,12 +527,28 @@ public class BattlegroundsSessionViewModel : ViewModel
  
  	private void DeleteOldGames(List<GameItem> sortedGames)
  	{
@@ -507,7 +505,7 @@ index 131b05dc..193ad9bf 100644
  	}
  
  	private void AddOrUpdateGame(GameItem game)
-@@ -614,6 +674,17 @@ public class BattlegroundsSessionViewModel : ViewModel
+@@ -665,6 +725,17 @@ public class BattlegroundsSessionViewModel : ViewModel
  		}
  	}
  
@@ -526,11 +524,11 @@ index 131b05dc..193ad9bf 100644
  	public Visibility BgStartCurrentMMRSectionVisibility
  	{
 diff --git a/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml b/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml
-index a80b09a4..f47e93a2 100644
+index f4e0472a..e56ad0dc 100644
 --- a/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml	
 +++ b/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml	
-@@ -9,96 +9,33 @@
-              xmlns:lex="http://wpflocalizeextension.codeplex.com"
+@@ -10,69 +10,24 @@
+              xmlns:utility="clr-namespace:Hearthstone_Deck_Tracker.Utility"
               mc:Ignorable="d"
               DataContextChanged="CardTooltip_OnDataContextChanged"
 +             Tag="HDT_WINE_TOOLTIP_NO_ZERO_STATE"
@@ -602,7 +600,9 @@ index a80b09a4..f47e93a2 100644
 -                </Style>
 -            </Grid.Style>
              <hdt:HearthstoneTextBlock Text="{Binding Text}" Visibility="{Binding Text, Converter={StaticResource NullableToVisibility}}" HorizontalAlignment="Center" VerticalAlignment="Top" d:Text="Created By" FontSize="16"/>
-             <Image Source="{Binding AssetViewModel.Asset}" HorizontalAlignment="Center" />
+             <Grid HorizontalAlignment="Center">
+                 <Image Source="{Binding AssetViewModel.Asset}"/>
+@@ -120,28 +75,10 @@
          </Grid>
  
          <!-- Secondary Image, e.g. Battlegrounds Triple -->
@@ -633,7 +633,7 @@ index a80b09a4..f47e93a2 100644
  
          <controls:GridCardImages DockPanel.Dock="{Binding ImageDock}" Cards="{Binding RelatedCards}" Title="{Binding RelatedCardsHeader}" Visibility="{Binding RelatedCards, Converter={StaticResource NullableToVisibility}}" VerticalAlignment="Center">
              <controls:GridCardImages.LayoutTransform>
-@@ -106,21 +43,6 @@
+@@ -149,21 +86,6 @@
                      ScaleX="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}}"
                      ScaleY="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}}" />
              </controls:GridCardImages.LayoutTransform>
@@ -655,7 +655,7 @@ index a80b09a4..f47e93a2 100644
          </controls:GridCardImages>
          <tooltips:PoolSummaryView
              DockPanel.Dock="{Binding ImageDock}"
-@@ -130,7 +52,6 @@
+@@ -173,7 +95,6 @@
              PoolStatistics="{Binding PoolStatistics}"
              RelatedCardsSummaryTotalNum="{Binding RelatedCardsSummaryTotalNum}"
              RelatedCardsSummary="{Binding RelatedCardsSummary}"
@@ -759,7 +759,7 @@ index c2929431..98ac6e94 100644
  
  			var hoverableMouseOver = behind ? NoMouseOver
 diff --git a/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs b/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs
-index 22a2f21c..8f7ea8bd 100644
+index 3673dbf5..752d8c3a 100644
 --- a/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs	
 +++ b/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs	
 @@ -31,6 +31,20 @@ namespace Hearthstone_Deck_Tracker.Windows
@@ -782,8 +782,30 @@ index 22a2f21c..8f7ea8bd 100644
 +
  		private async void SetTopmost()
  		{
- 			if(User32.GetHearthstoneWindow() == IntPtr.Zero)
-@@ -372,19 +386,37 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 			var hsWindow = User32.GetHearthstoneWindow();
+@@ -46,15 +60,17 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 				if(_overlayZState == OverlayZState.Behind)
+ 					return;
+ 
+-				// the topmost style can stay set while the window has dropped into the regular z-order band
++				// Wine build: the X11 stacking order is enforced by the external overlay
++				// guard, and Wine's EnumWindows z-order does not track it. Trust the
++				// topmost style alone (pre-1.58.2 behaviour); SetTopmost runs on every
++				// deactivation, so a false IsAbove would re-toggle Topmost 20 times
++				// against Hearthstone each time.
+ 				var isTopmost = User32.IsTopmost(hwnd);
+-				if(isTopmost && User32.IsAbove(hwnd, hsWindow))
++				if(isTopmost)
+ 				{
+ 					Log.Info($"Overlay is topmost after {i + 1} tries.");
+ 					return;
+ 				}
+-				if(isTopmost)
+-					Log.Warn("Overlay has topmost style but is behind Hearthstone");
+ 
+ 				Topmost = false;
+ 				Topmost = true;
+@@ -378,19 +394,37 @@ namespace Hearthstone_Deck_Tracker.Windows
  
  		public void UpdatePosition()
  		{
@@ -826,10 +848,10 @@ index 22a2f21c..8f7ea8bd 100644
  			{
  				OnPropertyChanged(nameof(BoardWidth));
 diff --git a/Hearthstone Deck Tracker/Windows/OverlayWindow.xaml.cs b/Hearthstone Deck Tracker/Windows/OverlayWindow.xaml.cs
-index 8763b378..eb6abef7 100644
+index f955402c..84013754 100644
 --- a/Hearthstone Deck Tracker/Windows/OverlayWindow.xaml.cs	
 +++ b/Hearthstone Deck Tracker/Windows/OverlayWindow.xaml.cs	
-@@ -687,6 +687,18 @@ namespace Hearthstone_Deck_Tracker.Windows
+@@ -699,6 +699,18 @@ namespace Hearthstone_Deck_Tracker.Windows
  
  		private void Window_Closing(object sender, CancelEventArgs e)
  		{

@@ -1,0 +1,10 @@
+{
+  "version": "1.59.8.9020",
+  "proton": "GE-Proton11-12-x86_64",
+  "pids": [
+    1546576
+  ],
+  "main_window": true,
+  "game_running": false,
+  "log": "/home/mike/Games/hs/battlenet/drive_c/users/steamuser/AppData/Roaming/HearthstoneDeckTracker/Logs/hdt_log.txt"
+}

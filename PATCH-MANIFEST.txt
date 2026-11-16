@@ -1,45 +1,49 @@
-Hearthstone Deck Tracker Wine overlay fixes (updated 2026-09-04)
+Hearthstone Deck Tracker Wine overlay fixes (updated 2026-11-04)
 
-Installed HDT version: 1.57.6.8270
-Patched source base: upstream master commit "v1.57.6" (no git tag since 1.57.x)
-  dbd9af96f68498dab72c67b3bf0267ae93012816
-HDT-Localization commit: 073618e76c91da02e42a31cc5fd3afd08a5122b7
+Installed HDT version: 1.59.8.9020
+Published release source commit: 2698623dc0e91491671a614ae176f9db68831aa7
+HDT-Localization commit: 7d7045c17c700ea24299732330da8a8e62fd8788
 Installed executable SHA-256:
-  d76cf0a7d6884cc5665a35eccb782ad62d03c1c5b65aed590f666d6515213a5a
+  46e5e17c3bc709da15baae36ecd544eefbb4aa665b38cbbf58b614a24897e07b
 Built executable before the transparency patch:
-  4de74719da41ddba6528086b38741188371fd485b7bca77737ccb1f11f063f1d
+  978699e18a6f972a9338562bee86e9f0f87c491aa634b48684c209092a07b432
+Official executable SHA-256:
+  c4333b655ffa7113e1b3c10e23fa2a9c7f82b8e84ebc3cc78ee33b2d53347b12
+Official full package SHA-256 (verified against the release asset digest):
+  c745478500040159fa5a5c5a4c7ae4f7085f26d6d2a3c071c60f549b87fa78d7
 
-Battlegrounds data compatibility update: after a Hearthstone update, v1.53.6
-HearthMirror returned an empty MatchInfo. BobsBuddyInvoker consequently failed
-with System.ArgumentException: Player, and both combat probabilities and the
-spell-damage/blood-gem counters lost their input. The installation now uses the
-complete official v1.57.6 dependency set plus a custom exe built from the exact
-same source commit. Do not mix individual DLLs between releases.
+The executable is built from the exact public v1.59.8 commit with the full
+local Wine patch. All 53 official runtime DLLs are byte-identical;
+System.Resources.Extensions.dll and the built main PDB are added.
+The full source patch applies to a clean checkout of the release commit.
+Fifteen regression tests passed against the installed executable.
 
-Official v1.57.6 dependency SHA-256:
+One merge conflict in AnimatedCard.EnsureTile was resolved by retaining the
+upstream Grid tooltip registration and applying local tooltip placement to
+both Grid and its tile. Upstream card pooling and refresh logic are preserved.
+
+Official v1.59.8 dependency SHA-256:
   HearthMirror.dll
-    685fb0be6daf34e292b1ab269a732b054ac3b11fce89461eccdc3f66178bddbb
+    952e65e9e023cfad2d45d1b4926c2a5aa11945a8741505f83d247c1aed60ffac
   HearthDb.dll
-    58ee840dd320a527b59c44fd51f56595446c776048ce68ba79311cc682ffb63b
+    16f85692678a8a2619284ede258acd899deb6f17ec76dc4c02ba90613b8ba2a1
   BobsBuddy.dll
-    b4c91f3806ffa81e71c1515f56afb856628c4e31f7bb7da61f93f0c1eb453281
+    828de022a04959b1899efbe66c5ae128c7f70962f5d5aab6d329a771cb5f5c6c
   BobsBuddy.Common.dll
-    f875a0c132ddcecc0825232f90ef6a5badc1ab0b15282453f04bc3f0d5f9e6f6
+    adfae076b37620e5595e0175b6aeeb39ba7edaed1e8bd29d03fc90e61f19a716
   HSReplay.dll
-    f311e9df3389b45f7287b80bb0106fe5d5b876a30b4401d4593c1bea006473bd
+    77b09ce57dbb1c7efe2141210f361f0e0cef76ad31ee12d7fe7be818f96abbfc
   untapped-scry-dotnet.dll
-    20b30d2e75de8ff15544b98d819405055a1c76d3efbcb60278a15bf0eec909ad
+    36432a5b52c38e0e4f4e29f574cf68ca774e18ebaae8b93dfe2fdee0d757668a
 
-v1.57.6 replaced SharpRaven with Sentry 6.9.0 and ships System.Buffers,
-System.Memory, System.Numerics.Vectors and System.Runtime.CompilerServices.Unsafe
-itself; only System.Resources.Extensions.dll is still added from the build.
+WPF AssemblyVersion/FileVersion: 1.59.8.9020.
+Build: Version=1.59.8, BuildNumber=9020, Release/x64.
+Verification results: build-v1.59.8/.
+Live startup: UMU/GE-Proton11-12, .NET Framework 528049; main window verified.
+Hearthstone was closed; no in-match overlay verification was performed.
 
-WPF release-version requirement: the upstream source file says 1.57.6, but the
-official release executable and its compiled pack URIs use 1.57.6.8270. Since
-1.57.x the csproj derives AssemblyVersion/FileVersion from Version plus the
-BuildNumber property, so the custom build passes --property:BuildNumber=8270
-instead of editing the file. A shortened version fails before creating its overlay with a
-FileNotFoundException for the mismatched HearthstoneDeckTracker assembly.
+Full pre-v1.59.8 installation backup:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1598-upgrade-20261104-112453
 
 Wine button fix: upstream HearthSim/Hearthstone-Deck-Tracker PR #4741,
 commit 7b32e0c164b5c751a01a61b8d664320ff4533768. Merged upstream as
@@ -108,6 +112,17 @@ during minimize/restore and always uses the DP-1 Win32/X11 rectangle
 3453,62 3412x1363. With monitor scale 1.25 this maps to the stable Hyprland
 game area near 11,50 2730x1091. Binary marker:
   HDT_WINE_FIXED_OVERLAY_2730X1091
+
+Topmost check (since v1.58.2): upstream commit 83b3d6a0 made SetTopmost require
+User32.IsAbove (EnumWindows z-order) in addition to the WS_EX_TOPMOST style.
+SetTopmost runs on every OnDeactivated; under Wine/Hyprland the X11 stacking
+order is enforced by wine-taskbar-icons.py and is not reflected by Wine's
+EnumWindows, so the patch restores the pre-1.58.2 condition (style alone) to
+avoid 20 Topmost toggles against Hearthstone on each deactivation. Watch
+hdt_log.txt for "Could not set overlay as topmost" if the overlay ever sinks. One
+such line right after an HDT start during a running match is expected: 1.58.2
+caches the HWND for the whole loop and the overlay window is recreated once on
+that start path, so the loop polls a dead handle; later calls succeed.
 
 External fullscreen/resize guard: Hyprland rules reject application fullscreen
 and maximize requests, while wine-taskbar-icons.py checks the actual compositor
@@ -232,6 +247,24 @@ Full pre-v1.56.1 installation backup:
 
 Full pre-v1.57.6 installation backup:
   /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1576-upgrade-20260904-022058
+
+Full pre-v1.57.10 installation backup:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v15710-upgrade-20260916-095017
+
+Full pre-v1.57.12 installation backup:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v15712-upgrade-20260921-134451
+
+Full pre-v1.58.0 installation backup:
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1580-upgrade-20260922-192827
+
+Full pre-v1.58.2 installation backup (hot swap while Hearthstone kept running):
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1582-upgrade-20260923-135224
+
+Full pre-v1.58.5 installation backup (hot swap; Hearthstone PID unchanged):
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1585-upgrade-20261002-145822
+
+Full pre-v1.58.6 installation backup (hot swap; Hearthstone PID unchanged):
+  /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1586-upgrade-20261002-165510
 
 Full backup before the Comp Guides and overlay lifecycle fix:
   /home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-guide-crash-fix-20260819-0554

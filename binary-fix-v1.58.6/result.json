@@ -1,0 +1,14 @@
+{
+  "version": "1.58.6.9003",
+  "upstream_commit": "484c3dfabdd1b640ff486d9b3ab9fce908230474",
+  "donor_commit": "b8f67044d5d02a85e7ad7bf4e8b14da8dd30d36e",
+  "localization_commit": "7d6f299d40ab78dcf23cbee51711e0c77c48a135",
+  "exe_sha256": "ec1b1ca31d460b863147d8528542531dada338056d27174bc4bd65a4c81747fb",
+  "woven_sha256": "48ff4dd02dc9181970db259ad190fcdbd0d760e6430e51874d16093c19f418a5",
+  "official_sha256": "3a7a11aa7b779fbb6bcbb328bc39f2a9ad78c18b1a5daa818364b4ea7be2716b",
+  "package_sha256": "8b33dbb35f050413c01c3d3f8773f685e599f3657d51c6cf62dc4cc87c79233e",
+  "archive_sha256": "a4b173f29c32b41a7dd0f5d8029d5d3150aa1139fe82d4bebf7237b347147e51",
+  "manifest_sha256": "7c339be04a84150059fe274c10223d039270954b55fc1b43a47f17d95f98607d",
+  "files": 174,
+  "backup": "/home/mike/.local/share/lutris/backups/hdt-overlay/manual-before-v1586-upgrade-20261002-165510"
+}

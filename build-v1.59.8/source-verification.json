@@ -1,0 +1,10 @@
+{
+  "upstream_commit": "2698623dc0e91491671a614ae176f9db68831aa7",
+  "patch_applies_to_clean_release": true,
+  "source_diff_check": true,
+  "official_package_digest_verified": true,
+  "official_dlls_unchanged": 53,
+  "archive_files_verified": 157,
+  "tests_used_installed_exe_sha256": "46e5e17c3bc709da15baae36ecd544eefbb4aa665b38cbbf58b614a24897e07b",
+  "tooltip_merge": "Upstream Grid tooltip registration retained; placement applied to Grid and tile."
+}

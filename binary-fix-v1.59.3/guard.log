@@ -1,0 +1,16 @@
+Battle.net lifecycle: launcher will stay open during Hearthstone
+HDT update guard: Wine compatibility checks passed
+HDT Wine overlay patch: applied
+HDT update guard: refreshed the known-good Wine snapshot
+executable: baed81f85e97003be8ecb71a34298044068a8851153071f12cd9857fcf67111e
+Wine button fix: yes
+fixed overlay geometry: yes
+Wine tooltip zero-state fix: yes
+Wine window opacity-mask disabled: yes
+Wine Battlegrounds click-through zone: yes
+tooltip resource runtime: yes
+Wine transparency fix: yes
+known transparency layout: yes
+working snapshot: valid
+automatic updates: disabled in HDT config
+rendering mode: software (Wine stability guard)

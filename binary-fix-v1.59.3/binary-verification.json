@@ -1,0 +1,35 @@
+{
+  "original_methods": 26308,
+  "unchanged_original_methods": 26288,
+  "changed_methods": [
+    "Hearthstone_Deck_Tracker.Controls.AnimatedCard Hearthstone_Deck_Tracker.Controls.AnimatedCardList::GetAnimatedCard(Hearthstone_Deck_Tracker.Hearthstone.Card)",
+    "System.Threading.Tasks.Task`1<System.Collections.Generic.Dictionary`2<System.Int32,Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Guides.BattlegroundsCompsGuidesViewModel/TieredComps>> Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Guides.BattlegroundsCompsGuidesViewModel::GetPremiumCompGuides(System.String,System.Int32[],System.Nullable`1<System.Int32>)",
+    "System.Threading.Tasks.Task`1<System.Collections.Generic.List`1<Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Guides.Comps.BattlegroundsCompGuideViewModel>> Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Guides.BattlegroundsCompsGuidesViewModel::GetCompGuides()",
+    "System.Threading.Tasks.Task`1<System.Collections.Generic.List`1<Hearthstone_Deck_Tracker.Utility.Battlegrounds.BattlegroundsLastGames/GameItem>> Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session.BattlegroundsSessionViewModel::UpdateLatestGames()",
+    "System.Void Hearthstone_Deck_Tracker.Controls.AnimatedCard::.ctor()",
+    "System.Void Hearthstone_Deck_Tracker.Controls.AnimatedCard::EnsureTile(System.Boolean)",
+    "System.Void Hearthstone_Deck_Tracker.Controls.AnimatedCardList::.ctor()",
+    "System.Void Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Guides.BattlegroundsCompsGuidesViewModel::OnMatchStart()",
+    "System.Void Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session.BattlegroundsSession::System.Windows.Markup.IComponentConnector.Connect(System.Int32,System.Object)",
+    "System.Void Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session.BattlegroundsSessionViewModel::.ctor()",
+    "System.Void Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session.BattlegroundsSessionViewModel::DeleteOldGames(System.Collections.Generic.List`1<Hearthstone_Deck_Tracker.Utility.Battlegrounds.BattlegroundsLastGames/GameItem>)",
+    "System.Void Hearthstone_Deck_Tracker.Utility.Overlay.OverlayOpacityMask::CreateOpacityMask()",
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow/<UnlockUi>d__31::MoveNext()",
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow::.cctor()",
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow::.ctor(Hearthstone_Deck_Tracker.Hearthstone.GameV2)",
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow::DetectMouseOver(System.Collections.Generic.List`1<Hearthstone_Deck_Tracker.Hearthstone.Entities.Entity>,System.Collections.Generic.List`1<Hearthstone_Deck_Tracker.Hearthstone.Entities.Entity>)",
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow::InitializeCollections()",
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow::SetTopmost()",
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow::UpdatePosition()",
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow::Window_Closing(System.Object,System.ComponentModel.CancelEventArgs)"
+  ],
+  "transparency_only_methods": [
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow/<UnlockUi>d__31::MoveNext()",
+    "System.Void Hearthstone_Deck_Tracker.Windows.OverlayWindow::.ctor(Hearthstone_Deck_Tracker.Hearthstone.GameV2)"
+  ],
+  "added_methods": 62,
+  "official_ctor_preserved_except_history_initializers": true,
+  "official_dlls_unchanged": 69,
+  "target_baml_matches_clean_baseline": true,
+  "unchanged_official_baml_resources": 408
+}

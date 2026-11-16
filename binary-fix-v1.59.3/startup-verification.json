@@ -1,0 +1,9 @@
+{
+  "version": "1.59.3.9015",
+  "proton": "GE-Proton11-9-x86_64",
+  "log": "$HDT_WINE_PREFIX/drive_c/users/steamuser/AppData/Roaming/HearthstoneDeckTracker/Logs/hdt_log.txt",
+  "main_window": true,
+  "game_running": false,
+  "dotnet_framework": 528049,
+  "portable_squirrel_init_warning": "Update.exe not found; HDT continued initialization"
+}

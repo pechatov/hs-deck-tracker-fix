@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ArrayOfPluginSettings>
+  <PluginSettings>
+    <FileName>Plugins/NomisKitchenHDT/NomisKitchenHDT.dll</FileName>
+    <IsEnabled>true</IsEnabled>
+    <Name>Nomi's Kitchen</Name>
+  </PluginSettings>
+</ArrayOfPluginSettings>

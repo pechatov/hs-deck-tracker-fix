@@ -20,4 +20,5 @@ wine:
   fsr: false
   override:
     locationapi: d
+    winhttp: n,b
 year: 2014

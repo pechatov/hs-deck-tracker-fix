@@ -1,0 +1,872 @@
+diff --git a/HDTTests/Battlegrounds/BattlegroundsSessionRecentGamesTest.cs b/HDTTests/Battlegrounds/BattlegroundsSessionRecentGamesTest.cs
+new file mode 100644
+index 00000000..21af146b
+--- /dev/null
++++ b/HDTTests/Battlegrounds/BattlegroundsSessionRecentGamesTest.cs
+@@ -0,0 +1,64 @@
++using System;
++using System.Collections.Generic;
++using System.Linq;
++using Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session;
++using Microsoft.VisualStudio.TestTools.UnitTesting;
++using static Hearthstone_Deck_Tracker.Utility.Battlegrounds.BattlegroundsLastGames;
++
++namespace HDTTests.Battlegrounds
++{
++	[TestClass]
++	public class BattlegroundsSessionRecentGamesTest
++	{
++		[TestMethod]
++		public void GetMostRecentGames_ReturnsNewestTwentyInDisplayOrder()
++		{
++			var games = CreateGames(25, DateTime.Today.AddDays(-25));
++
++			var recentGames = BattlegroundsSessionViewModel.GetMostRecentGames(
++				games,
++				BattlegroundsSessionViewModel.RecentGamesLimit
++			);
++
++			Assert.AreEqual(20, recentGames.Count);
++			CollectionAssert.AreEqual(
++				games.Skip(5).Reverse().Select(g => g.StartTime).ToList(),
++				recentGames.Select(g => g.StartTime).ToList()
++			);
++		}
++
++		[TestMethod]
++		public void GetExpiredGames_AlwaysRetainsNewestTwenty()
++		{
++			var now = DateTime.Today;
++			var games = CreateGames(25, now.AddDays(-30));
++
++			var expiredGames = BattlegroundsSessionViewModel.GetExpiredGames(games, now);
++
++			Assert.AreEqual(5, expiredGames.Count);
++			CollectionAssert.AreEqual(
++				games.Take(5).Select(g => g.StartTime).ToList(),
++				expiredGames.Select(g => g.StartTime).ToList()
++			);
++		}
++
++		[TestMethod]
++		public void GetExpiredGames_DoesNotDeleteRecentGamesBeyondTwenty()
++		{
++			var now = DateTime.Today;
++			var games = CreateGames(25, now.AddDays(-1));
++
++			var expiredGames = BattlegroundsSessionViewModel.GetExpiredGames(games, now);
++
++			Assert.AreEqual(0, expiredGames.Count);
++		}
++
++		private static List<GameItem> CreateGames(int count, DateTime firstGameStart) =>
++			Enumerable.Range(0, count)
++				.Select(index => new GameItem
++				{
++					StartTime = firstGameStart.AddHours(index).ToString("O")
++				})
++				.ToList();
++	}
++}
+diff --git a/HDTTests/Battlegrounds/GuidesTabsOverlayCompatibilityTest.cs b/HDTTests/Battlegrounds/GuidesTabsOverlayCompatibilityTest.cs
+new file mode 100644
+index 00000000..c99a1830
+--- /dev/null
++++ b/HDTTests/Battlegrounds/GuidesTabsOverlayCompatibilityTest.cs
+@@ -0,0 +1,125 @@
++using System.IO;
++using System.Linq;
++using System.Text.RegularExpressions;
++using Microsoft.VisualStudio.TestTools.UnitTesting;
++
++namespace HDTTests.Battlegrounds
++{
++	[TestClass]
++	public class GuidesTabsOverlayCompatibilityTest
++	{
++		[TestMethod]
++		public void GuidesTabs_ShouldNotUseWpfButtonControls()
++		{
++			// GuidesTabs is displayed in the Battlegrounds overlay which is a
++			// WS_EX_TRANSPARENT click-through overlay window. Standard WPF Button
++			// controls do not fire click events reliably under Wine/Linux in this
++			// configuration. The tab triggers must use overlay-compatible click
++			// handling (e.g. MouseLeftButtonUp on Border/UserControl).
++			var xamlPath = Path.GetFullPath(Path.Combine(
++				TestContextHelper.GetProjectRoot(),
++				"Hearthstone Deck Tracker",
++				"Controls",
++				"Overlay",
++				"Battlegrounds",
++				"Guides",
++				"GuidesTabs.xaml"
++			));
++
++			Assert.IsTrue(File.Exists(xamlPath), $"GuidesTabs.xaml not found at {xamlPath}");
++
++			var xaml = File.ReadAllText(xamlPath);
++
++			var buttonMatches = Regex.Matches(xaml, @"<\s*(Button|ButtonBase|ToggleButton|RepeatButton)[\s/>]", RegexOptions.IgnoreCase);
++			var count = buttonMatches.Count;
++
++			Assert.AreEqual(0, count,
++				$"GuidesTabs.xaml contains {count} WPF Button/ButtonBase element(s). " +
++				"Use overlay-compatible controls (OverlayButton) instead. " +
++				"Standard WPF Button controls are unreliable in WS_EX_TRANSPARENT overlay windows under Wine.");
++		}
++
++		[TestMethod]
++		public void BattlegroundsMinionPinning_ShouldNotUseWpfButtonControls()
++		{
++			// BattlegroundsMinionPinning is displayed in the Battlegrounds overlay
++			// which is a WS_EX_TRANSPARENT click-through overlay window. Standard
++			// WPF Button controls do not fire click events reliably under Wine/Linux
++			// in this configuration. All interactive triggers must use overlay-
++			// compatible click handling (e.g. MouseLeftButtonUp on Border).
++			var xamlPath = Path.GetFullPath(Path.Combine(
++				TestContextHelper.GetProjectRoot(),
++				"Hearthstone Deck Tracker",
++				"Controls",
++				"Overlay",
++				"Battlegrounds",
++				"MinionPinning",
++				"BattlegroundsMinionPinning.xaml"
++			));
++
++			Assert.IsTrue(File.Exists(xamlPath), $"BattlegroundsMinionPinning.xaml not found at {xamlPath}");
++
++			var xaml = File.ReadAllText(xamlPath);
++
++			var buttonMatches = Regex.Matches(xaml, @"<\s*(Button|ButtonBase|ToggleButton|RepeatButton)[\s/>]", RegexOptions.IgnoreCase);
++			var count = buttonMatches.Count;
++
++			Assert.AreEqual(0, count,
++				$"BattlegroundsMinionPinning.xaml contains {count} WPF Button/ButtonBase element(s). " +
++				"Use overlay-compatible controls (OverlayButton) instead. " +
++				"Standard WPF Button controls are unreliable in WS_EX_TRANSPARENT overlay windows under Wine.");
++		}
++
++		[TestMethod]
++		public void GuidesTabsContent_ShouldNotUseWpfButtonControls()
++		{
++			var relativePaths = new[]
++			{
++				Path.Combine("Hearthstone Deck Tracker", "Controls", "Overlay", "Battlegrounds", "Minions", "BattlegroundsMinions.xaml"),
++				Path.Combine("Hearthstone Deck Tracker", "Controls", "Overlay", "Battlegrounds", "Minions", "BattlegroundsMinionsExtraFilters.xaml"),
++				Path.Combine("Hearthstone Deck Tracker", "Controls", "Overlay", "Battlegrounds", "Guides", "Comps", "CompGuideList.xaml"),
++				Path.Combine("Hearthstone Deck Tracker", "Controls", "Overlay", "Battlegrounds", "Guides", "Comps", "CompButton.xaml"),
++				Path.Combine("Hearthstone Deck Tracker", "Controls", "Overlay", "Battlegrounds", "Guides", "Comps", "CompGuide.xaml"),
++				Path.Combine("Hearthstone Deck Tracker", "Controls", "Overlay", "Battlegrounds", "Inspiration", "BattlegroundsInspiration.xaml"),
++			};
++
++			foreach(var relativePath in relativePaths)
++			{
++				var xamlPath = Path.GetFullPath(Path.Combine(TestContextHelper.GetProjectRoot(), relativePath));
++				Assert.IsTrue(File.Exists(xamlPath), $"Overlay XAML file not found at {xamlPath}");
++
++				var xaml = File.ReadAllText(xamlPath);
++				var buttonMatches = Regex.Matches(xaml, @"<\s*(Button|ButtonBase|ToggleButton|RepeatButton)[\s/>]", RegexOptions.IgnoreCase);
++				var count = buttonMatches.Count;
++
++				Assert.AreEqual(0, count,
++					$"{Path.GetFileName(xamlPath)} contains {count} WPF Button/ButtonBase element(s). " +
++					"Use overlay-compatible controls (OverlayButton) instead. " +
++					"Standard WPF Button controls are unreliable in WS_EX_TRANSPARENT overlay windows under Wine.");
++			}
++		}
++	}
++
++	internal static class TestContextHelper
++	{
++		/// <summary>
++		/// Walk up from the test assembly location to find the repo root
++		/// (the directory containing the .sln file).
++		/// </summary>
++		public static string GetProjectRoot()
++		{
++			var dir = Path.GetDirectoryName(typeof(TestContextHelper).Assembly.Location);
++			while(dir != null)
++			{
++				if(Directory.GetFiles(dir, "*.sln").Any())
++					return dir;
++				dir = Path.GetDirectoryName(dir);
++			}
++			// Fallback: use relative from repo structure
++			return Path.GetFullPath(Path.Combine(
++				Path.GetDirectoryName(typeof(TestContextHelper).Assembly.Location) ?? ".",
++				"..", "..", "..", ".."
++			));
++		}
++	}
++}
+diff --git a/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs b/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs
+index 86d55dcc..4ae371a2 100644
+--- a/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs	
++++ b/Hearthstone Deck Tracker/Controls/AnimatedCard.xaml.cs	
+@@ -5,6 +5,8 @@ using System.Linq;
+ using System.Runtime.CompilerServices;
+ using System.Threading.Tasks;
+ using System.Windows;
++using System.Windows.Controls;
++using System.Windows.Controls.Primitives;
+ using System.Windows.Input;
+ using System.Windows.Media.Animation;
+ using Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Minions;
+@@ -70,6 +72,8 @@ public partial class AnimatedCard : IPoolItem, IDisposable, INotifyPropertyChang
+ 			return;
+ 		_tileIsBattlegrounds = useBattlegroundsTile;
+ 		TileHost.Content = useBattlegroundsTile ? new BattlegroundsCardTile() : (object)new CardTile();
++		if(TileHost.Content is DependencyObject tile)
++			ToolTipService.SetPlacement(tile, _cardTooltipPlacement);
+ 	}
+ 
+ 	public void Update(Hearthstone.Card card, bool showTier7InspirationBtn = false, bool showDeckListFeatures = true, bool useBattlegroundsTile = false)
+@@ -128,6 +132,18 @@ public partial class AnimatedCard : IPoolItem, IDisposable, INotifyPropertyChang
+ 
+ 	public Hearthstone.Card? Card => DataContext as Hearthstone.Card;
+ 
++	private PlacementMode _cardTooltipPlacement = PlacementMode.Right;
++	public PlacementMode CardTooltipPlacement
++	{
++		get => _cardTooltipPlacement;
++		set
++		{
++			_cardTooltipPlacement = value;
++			if(TileHost.Content is DependencyObject tile)
++				ToolTipService.SetPlacement(tile, value);
++		}
++	}
++
+ 	private CardTileViewModel? _cardTileViewModel;
+ 	public CardTileViewModel? CardTileViewModel
+ 	{
+diff --git a/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs b/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs
+index e89c8824..41f0e741 100644
+--- a/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs	
++++ b/Hearthstone Deck Tracker/Controls/AnimatedCardList.xaml.cs	
+@@ -42,6 +42,8 @@ public partial class AnimatedCardList
+ 
+ 	public bool UseBattlegroundsTile { get; set; }
+ 
++	public PlacementMode CardTooltipPlacement { get; set; } = PlacementMode.Right;
++
+ 	private Func<Hearthstone.Card, IEnumerable<Hearthstone.Card>, HighlightColor>? _shouldHighlightCard;
+ 	public Func<Hearthstone.Card, IEnumerable<Hearthstone.Card>, HighlightColor>? ShouldHighlightCard
+ 	{
+@@ -200,6 +202,7 @@ public partial class AnimatedCardList
+ 	private AnimatedCard GetAnimatedCard(Hearthstone.Card card)
+ 	{
+ 		var animatedCard = _animatedCardPool.GetOrCreate(card.Id);
++		animatedCard.CardTooltipPlacement = CardTooltipPlacement;
+ 		animatedCard.Update(card, ShowTier7InspirationButton && card.IsBaconMinion, ShowDeckListFeatures, UseBattlegroundsTile);
+ 		animatedCard.ShowPinButton = ShowPinButton;
+ 		animatedCard.MaxHeight = ViewModel.MaxHeightCard;
+diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Guides/BattlegroundsCompsGuidesViewModel.cs b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Guides/BattlegroundsCompsGuidesViewModel.cs
+index 56c1f57a..7d22af89 100644
+--- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Guides/BattlegroundsCompsGuidesViewModel.cs	
++++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Guides/BattlegroundsCompsGuidesViewModel.cs	
+@@ -128,7 +128,10 @@ public class BattlegroundsCompsGuidesViewModel : ViewModel
+ 		try
+ 		{
+ 			var compsData = await ApiWrapper.GetCompsGuides(Helper.GetCardLanguage());
+-			var viewModelData = compsData?
++			if(compsData == null)
++				throw new InvalidOperationException("The composition guides request returned no data");
++
++			var viewModelData = compsData
+ 				.OrderBy(comp => comp.Name)
+ 				.Select(comp => new BattlegroundsCompGuideViewModel(comp, IsPreLobby))
+ 				.ToList();
+@@ -165,7 +168,7 @@ public class BattlegroundsCompsGuidesViewModel : ViewModel
+ 				: await HSReplayNetOAuth.MakeRequest(c => c.GetTier7CompsGuides(Helper.GetCardLanguage(), currentRaces));
+ 
+ 			if(compsData?.ByTier == null)
+-				return null;
++				throw new InvalidOperationException("The Tier7 composition guides request returned no data");
+ 
+ 			var result = new Dictionary<int, TieredComps>();
+ 
+@@ -247,17 +250,25 @@ public class BattlegroundsCompsGuidesViewModel : ViewModel
+ 			SelectedComp = null;
+ 		}
+ 
+-		if(Core.Game.Spectator)
+-			await Task.Delay(1500);
+-
++		var lockTaken = false;
+ 		try
+ 		{
++			if(Core.Game.Spectator)
++				await Task.Delay(1500);
++
+ 			await _updateCompGuidesSemaphore.WaitAsync();
++			lockTaken = true;
+ 			await UpdateCompGuides();
+ 		}
++		catch(Exception e)
++		{
++			Log.Error(e);
++			HandleCompGuidesError(e.GetType().Name, e.Message);
++		}
+ 		finally
+ 		{
+-			_updateCompGuidesSemaphore.Release();
++			if(lockTaken)
++				_updateCompGuidesSemaphore.Release();
+ 		}
+ 	}
+ 
+diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Minions/BattlegroundsCardsGroup.xaml b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Minions/BattlegroundsCardsGroup.xaml
+index 0848df13..5f6d33bd 100644
+--- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Minions/BattlegroundsCardsGroup.xaml	
++++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Minions/BattlegroundsCardsGroup.xaml	
+@@ -65,7 +65,7 @@
+                         />
+                     </DockPanel>
+                 </Border>
+-                <controls:AnimatedCardList x:Name="CardsList" ShowDeckListFeatures="False"/>
++                <controls:AnimatedCardList x:Name="CardsList" ShowDeckListFeatures="False" CardTooltipPlacement="Left"/>
+             </StackPanel>
+         </Grid>
+     </Border>
+diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml
+index aa531fef..bb41af74 100644
+--- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml	
++++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSession.xaml	
+@@ -331,6 +331,33 @@
+                             </ItemsPanelTemplate>
+                         </ItemsControl.ItemsPanel>
+                     </ItemsControl>
++                    <battlegrounds:OverlayButton
++                        x:Name="BtnShowMoreGames"
++                        Command="{Binding ToggleRecentGamesCommand}"
++                        Visibility="{Binding ShowMoreGamesButtonVisibility, FallbackValue=Collapsed}"
++                        Cursor="Hand"
++                        Height="29"
++                    >
++                        <battlegrounds:OverlayButton.Style>
++                            <Style TargetType="battlegrounds:OverlayButton">
++                                <Setter Property="Background" Value="#1C2022" />
++                                <Setter Property="BorderBrush" Value="#4A5256" />
++                                <Setter Property="BorderThickness" Value="0,1,0,0" />
++                                <Style.Triggers>
++                                    <Trigger Property="IsMouseOver" Value="True">
++                                        <Setter Property="Background" Value="#2E3235" />
++                                    </Trigger>
++                                </Style.Triggers>
++                            </Style>
++                        </battlegrounds:OverlayButton.Style>
++                        <hearthstoneDeckTracker:HearthstoneTextBlock
++                            Text="{Binding ShowMoreGamesButtonText}"
++                            FontSize="12"
++                            HorizontalAlignment="Center"
++                            VerticalAlignment="Center"
++                            Opacity=".8"
++                        />
++                    </battlegrounds:OverlayButton>
+                 </StackPanel>
+             </StackPanel>
+             <battlegrounds:OverlayButton
+diff --git a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs
+index ea5c4106..79f3a621 100644
+--- a/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs	
++++ b/Hearthstone Deck Tracker/Controls/Overlay/Battlegrounds/Session/BattlegroundsSessionViewModel.xaml.cs	
+@@ -5,9 +5,11 @@ using System.Linq;
+ using System.Threading;
+ using System.Threading.Tasks;
+ using System.Windows;
++using System.Windows.Input;
+ using HearthDb.Enums;
+ using HearthMirror;
+ using HearthMirror.Objects;
++using Hearthstone_Deck_Tracker.Commands;
+ using Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Composition;
+ using Hearthstone_Deck_Tracker.Enums.Hearthstone;
+ using Hearthstone_Deck_Tracker.Hearthstone;
+@@ -29,7 +31,13 @@ namespace Hearthstone_Deck_Tracker.Controls.Overlay.Battlegrounds.Session;
+ 
+ public class BattlegroundsSessionViewModel : ViewModel
+ {
++	internal const int SessionGamesLimit = 8;
++	internal const int RecentGamesLimit = 20;
++
+ 	private readonly BattlegroundsDb _db = BattlegroundsDbSingleton.Instance;
++	private List<GameItem> _sessionGames = new();
++	private List<GameItem> _recentGames = new();
++	private bool _showRecentGames;
+ 
+ 	public ObservableCollection<Race> AvailableMinionTypes { get; } = new();
+ 	public ObservableCollection<Race> BannedMinionTypes { get; } = new();
+@@ -361,29 +369,65 @@ public class BattlegroundsSessionViewModel : ViewModel
+ 			.ToList();
+ 		DeleteOldGames(sortedGames);
+ 
+-		var sessionGames = GetSessionGames(sortedGames, Core.Game.BattlegroundsRatingInfo, duos);
+-		var firstGame = sessionGames.FirstOrDefault();
++		_sessionGames = GetSessionGames(sortedGames, Core.Game.BattlegroundsRatingInfo, duos);
++		_recentGames = GetMostRecentGames(sortedGames, RecentGamesLimit);
++		var firstGame = _sessionGames.FirstOrDefault();
+ 
+-		SessionGames.Clear();
+-		sessionGames
+-			.GetRange(Math.Max(sessionGames.Count - 8, 0), Math.Min(8, sessionGames.Count))
++		var defaultSessionGamesCount = Math.Min(_sessionGames.Count, SessionGamesLimit);
++		ShowMoreGamesButtonVisibility = _recentGames.Count > defaultSessionGamesCount
++			? Visibility.Visible
++			: Visibility.Collapsed;
++		if(ShowMoreGamesButtonVisibility != Visibility.Visible)
++			_showRecentGames = false;
++
++		UpdateDisplayedGames();
++
++		Core.Windows.BattlegroundsSessionWindow.UpdateBattlegroundsSessionLayoutHeight();
++
++		return firstGame;
++	}
++
++	internal static List<GameItem> GetMostRecentGames(List<GameItem> sortedGames, int limit) =>
++		sortedGames
++			.Skip(Math.Max(sortedGames.Count - limit, 0))
+ 			.OrderByDescending(g => g.StartTime)
+-			.ToList()
+-			.ForEach(AddOrUpdateGame);
++			.ToList();
++
++	private void UpdateDisplayedGames()
++	{
++		var games = _showRecentGames
++			? _recentGames
++			: GetMostRecentGames(_sessionGames, SessionGamesLimit);
+ 
+-		GridHeaderVisibility = sessionGames.Count > 0
++		SessionGames.Clear();
++		games.ForEach(AddOrUpdateGame);
++
++		GridHeaderVisibility = games.Count > 0
+ 			? Visibility.Visible
+ 			: Visibility.Collapsed;
+ 
+-		GamesEmptyStateVisibility = sessionGames.Count == 0
++		GamesEmptyStateVisibility = games.Count == 0
+ 			? Visibility.Visible
+ 			: Visibility.Collapsed;
+ 
+-		Core.Windows.BattlegroundsSessionWindow.UpdateBattlegroundsSessionLayoutHeight();
++		OnPropertyChanged(nameof(ShowMoreGamesButtonText));
++	}
+ 
+-		return firstGame;
++	private void ToggleRecentGames()
++	{
++		_showRecentGames = !_showRecentGames;
++		UpdateDisplayedGames();
++		Core.Windows.BattlegroundsSessionWindow.UpdateBattlegroundsSessionLayoutHeight();
+ 	}
+ 
++	private ICommand? _toggleRecentGamesCommand;
++	public ICommand ToggleRecentGamesCommand =>
++		_toggleRecentGamesCommand ??= new Command(ToggleRecentGames);
++
++	public string ShowMoreGamesButtonText => _showRecentGames
++		? "Show session games"
++		: "Show more games";
++
+ 	internal static List<GameItem> GetSessionGames(List<GameItem> sortedGames, BattlegroundRatingInfo? ratingInfo, bool duos)
+ 	{
+ 		DateTime? sessionStartTime = null;
+@@ -430,12 +474,28 @@ public class BattlegroundsSessionViewModel : ViewModel
+ 
+ 	private void DeleteOldGames(List<GameItem> sortedGames)
+ 	{
+-		sortedGames.ForEach(g =>
++		var gamesToDelete = GetExpiredGames(sortedGames, DateTime.Now);
++		gamesToDelete.ForEach(g =>
+ 		{
+-			var ts = DateTime.Now - DateTime.Parse(g.StartTime);
+-			if(g.StartTime != null && ts.TotalDays >= 7)
+-				Instance.RemoveGame(g.StartTime);
++			if(g.StartTime != null)
++				Instance.RemoveGame(g.StartTime, false);
+ 		});
++		if(gamesToDelete.Count > 0)
++		{
++			sortedGames.RemoveAll(gamesToDelete.Contains);
++			BattlegroundsLastGames.Save();
++		}
++	}
++
++	internal static List<GameItem> GetExpiredGames(List<GameItem> sortedGames, DateTime now)
++	{
++		var numberEligibleForDeletion = Math.Max(sortedGames.Count - RecentGamesLimit, 0);
++		return sortedGames
++			.Take(numberEligibleForDeletion)
++			.Where(g => g.StartTime != null
++				&& DateTime.TryParse(g.StartTime, out var startTime)
++				&& (now - startTime).TotalDays >= 7)
++			.ToList();
+ 	}
+ 
+ 	private void AddOrUpdateGame(GameItem game)
+@@ -612,6 +672,17 @@ public class BattlegroundsSessionViewModel : ViewModel
+ 		}
+ 	}
+ 
++	private Visibility _showMoreGamesButtonVisibility;
++	public Visibility ShowMoreGamesButtonVisibility
++	{
++		get => _showMoreGamesButtonVisibility;
++		set
++		{
++			_showMoreGamesButtonVisibility = value;
++			OnPropertyChanged();
++		}
++	}
++
+ 	private Visibility _bgStartCurrentMMRSectionVisibility;
+ 	public Visibility BgStartCurrentMMRSectionVisibility
+ 	{
+diff --git a/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml b/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml
+index a80b09a4..f47e93a2 100644
+--- a/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml	
++++ b/Hearthstone Deck Tracker/Controls/Tooltips/CardTooltip.xaml	
+@@ -9,96 +9,33 @@
+              xmlns:lex="http://wpflocalizeextension.codeplex.com"
+              mc:Ignorable="d"
+              DataContextChanged="CardTooltip_OnDataContextChanged"
++             Tag="HDT_WINE_TOOLTIP_NO_ZERO_STATE"
+              d:DesignHeight="256" d:DesignWidth="256">
+     <UserControl.Resources>
+         <controls:CardImageSizeConverter x:Key="CardImageSizeConverter"/>
+         <Style TargetType="Image">
+             <Setter Property="RenderOptions.BitmapScalingMode" Value="Fant"/>
+         </Style>
+-        <Storyboard x:Key="StoryboardShow">
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2" />
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2" />
+-        </Storyboard>
+-        <Storyboard x:Key="StoryboardShowDelayed">
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2" BeginTime="0:0:0.8" />
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2" BeginTime="0:0:0.8" />
+-        </Storyboard>
+-        <Storyboard x:Key="StoryboardHide">
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="0" Duration="0:0:0" />
+-            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="0" Duration="0:0:0" />
+-        </Storyboard>
+-        <Storyboard x:Key="StoryboardFadeInDelayed">
+-            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.2" BeginTime="0:0:0.3" />
+-        </Storyboard>
+-        <Storyboard x:Key="StoryboardFadeOutInstant">
+-            <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0" />
+-        </Storyboard>
+-        <!-- Fade-in/out for the pool summary panel, passed to PoolSummaryView.RootBorderStyle -->
+-        <Style x:Key="PoolSummaryFadeInStyle" TargetType="Border">
+-            <Setter Property="Opacity" Value="0"/>
+-            <Style.Triggers>
+-                <DataTrigger Binding="{Binding Path=IsVisible, RelativeSource={RelativeSource Self}}" Value="True">
+-                    <DataTrigger.EnterActions>
+-                        <BeginStoryboard Storyboard="{StaticResource StoryboardFadeInDelayed}"/>
+-                    </DataTrigger.EnterActions>
+-                    <DataTrigger.ExitActions>
+-                        <BeginStoryboard Storyboard="{StaticResource StoryboardFadeOutInstant}"/>
+-                    </DataTrigger.ExitActions>
+-                </DataTrigger>
+-            </Style.Triggers>
+-        </Style>
+     </UserControl.Resources>
+     <DockPanel DataContext="{Binding ViewModel, RelativeSource={RelativeSource AncestorType=UserControl}}">
+ 
+         <!-- Primary Image -->
+-        <Grid Name="PrimaryImage" DockPanel.Dock="{Binding ImageDock}" Visibility="{Binding AssetViewModel, Converter={StaticResource NullableToVisibility}, ConverterParameter={x:Static Visibility.Hidden}}" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Center"
++        <!-- Wine can miss an immediate WPF storyboard transition when this tooltip is
++             inserted into the transparent overlay. Never create a zero-scale visual:
++             its dirty rectangle is otherwise presented as an opaque black region. -->
++        <Grid Name="PrimaryImage" DockPanel.Dock="{Binding ImageDock}" Visibility="{Binding AssetViewModel, Converter={StaticResource NullableToVisibility}, ConverterParameter={x:Static Visibility.Hidden}}" VerticalAlignment="Center"
+               Margin="{Binding CardImageOffset}"
+               MaxWidth="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Width}}"
+               MaxHeight="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Height}}">
+-            <Grid.RenderTransform>
+-                <ScaleTransform ScaleX="0" ScaleY="0"/>
+-            </Grid.RenderTransform>
+-            <Grid.Style>
+-                <Style TargetType="Grid">
+-                    <Style.Triggers>
+-                        <DataTrigger Binding="{Binding Path=IsVisible, RelativeSource={RelativeSource Self}}" Value="True">
+-                            <DataTrigger.EnterActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardShow}"/>
+-                            </DataTrigger.EnterActions>
+-                            <DataTrigger.ExitActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardHide}"/>
+-                            </DataTrigger.ExitActions>
+-                        </DataTrigger>
+-                    </Style.Triggers>
+-                </Style>
+-            </Grid.Style>
+             <hdt:HearthstoneTextBlock Text="{Binding Text}" Visibility="{Binding Text, Converter={StaticResource NullableToVisibility}}" HorizontalAlignment="Center" VerticalAlignment="Top" d:Text="Created By" FontSize="16"/>
+             <Image Source="{Binding AssetViewModel.Asset}" HorizontalAlignment="Center" />
+         </Grid>
+ 
+         <!-- Secondary Image, e.g. Battlegrounds Triple -->
+-        <Image DockPanel.Dock="{Binding ImageDock}" Source="{Binding SecondaryAssetViewModel.Asset}" Visibility="{Binding SecondaryAssetViewModel, Converter={StaticResource NullableToVisibility}}" RenderTransformOrigin="0.5,0.5" VerticalAlignment="Center"
++        <Image DockPanel.Dock="{Binding ImageDock}" Source="{Binding SecondaryAssetViewModel.Asset}" Visibility="{Binding SecondaryAssetViewModel, Converter={StaticResource NullableToVisibility}}" VerticalAlignment="Center"
+               Margin="{Binding CardImageOffset}"
+               MaxWidth="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Width}}"
+-              MaxHeight="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Height}}">
+-            <Image.RenderTransform>
+-                <ScaleTransform ScaleX="0" ScaleY="0"/>
+-            </Image.RenderTransform>
+-            <Image.Style>
+-                <Style TargetType="Image">
+-                    <Style.Triggers>
+-                        <DataTrigger Binding="{Binding Path=IsVisible, RelativeSource={RelativeSource Self}}" Value="True">
+-                            <DataTrigger.EnterActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardShowDelayed}"/>
+-                            </DataTrigger.EnterActions>
+-                            <DataTrigger.ExitActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardHide}"/>
+-                            </DataTrigger.ExitActions>
+-                        </DataTrigger>
+-                    </Style.Triggers>
+-                </Style>
+-            </Image.Style>
+-        </Image>
++              MaxHeight="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}, Converter={StaticResource CardImageSizeConverter}, ConverterParameter={x:Static controls:CardImageSizeType.Height}}"/>
+ 
+         <controls:GridCardImages DockPanel.Dock="{Binding ImageDock}" Cards="{Binding RelatedCards}" Title="{Binding RelatedCardsHeader}" Visibility="{Binding RelatedCards, Converter={StaticResource NullableToVisibility}}" VerticalAlignment="Center">
+             <controls:GridCardImages.LayoutTransform>
+@@ -106,21 +43,6 @@
+                     ScaleX="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}}"
+                     ScaleY="{Binding Path=Bindable.CardImageSize, Source={StaticResource ConfigWrapper}}" />
+             </controls:GridCardImages.LayoutTransform>
+-            <controls:GridCardImages.Style>
+-                <Style TargetType="controls:GridCardImages">
+-                    <Setter Property="Opacity" Value="0"/>
+-                    <Style.Triggers>
+-                        <DataTrigger Binding="{Binding Path=IsVisible, RelativeSource={RelativeSource Self}}" Value="True">
+-                            <DataTrigger.EnterActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardFadeInDelayed}"/>
+-                            </DataTrigger.EnterActions>
+-                            <DataTrigger.ExitActions>
+-                                <BeginStoryboard Storyboard="{StaticResource StoryboardFadeOutInstant}"/>
+-                            </DataTrigger.ExitActions>
+-                        </DataTrigger>
+-                    </Style.Triggers>
+-                </Style>
+-            </controls:GridCardImages.Style>
+         </controls:GridCardImages>
+         <tooltips:PoolSummaryView
+             DockPanel.Dock="{Binding ImageDock}"
+@@ -130,7 +52,6 @@
+             PoolStatistics="{Binding PoolStatistics}"
+             RelatedCardsSummaryTotalNum="{Binding RelatedCardsSummaryTotalNum}"
+             RelatedCardsSummary="{Binding RelatedCardsSummary}"
+-            HasLargePool="{Binding HasLargePool}"
+-            RootBorderStyle="{StaticResource PoolSummaryFadeInStyle}"/>
++            HasLargePool="{Binding HasLargePool}"/>
+     </DockPanel>
+ </UserControl>
+diff --git a/Hearthstone Deck Tracker/Utility/Overlay/OverlayOpacityMask.cs b/Hearthstone Deck Tracker/Utility/Overlay/OverlayOpacityMask.cs
+index 7e7d33f5..f5076949 100644
+--- a/Hearthstone Deck Tracker/Utility/Overlay/OverlayOpacityMask.cs	
++++ b/Hearthstone Deck Tracker/Utility/Overlay/OverlayOpacityMask.cs	
+@@ -8,6 +8,8 @@ namespace Hearthstone_Deck_Tracker.Utility.Overlay
+ {
+     public class OverlayOpacityMask : INotifyPropertyChanged
+     {
++		private const string WineOpacityMaskMarker = "HDT_WINE_OPACITY_MASK_DISABLED";
++
+         private DrawingBrush? _mask;
+         public DrawingBrush? Mask
+         {
+@@ -98,30 +100,14 @@ namespace Hearthstone_Deck_Tracker.Utility.Overlay
+ 
+         private void CreateOpacityMask()
+         {
+-	        if(_disabled)
+-		        return;
+-	        var fullAreaGeometry = new RectangleGeometry(new Rect(0, 0, 1, 1));
+-	        Geometry combinedGeometry = fullAreaGeometry;
+-
+-	        foreach (var regions in _maskedRegions.Values)
+-	        {
+-		        foreach (var region in regions)
+-		        {
+-			        var regionGeometry = new RectangleGeometry(region);
+-			        combinedGeometry = new CombinedGeometry(GeometryCombineMode.Exclude, combinedGeometry, regionGeometry);
+-		        }
+-	        }
+-
+-	        var geometryDrawing = new GeometryDrawing
+-	        {
+-		        Brush = Brushes.Black,
+-		        Geometry = combinedGeometry
+-	        };
+-
+-	        Mask = new DrawingBrush
+-	        {
+-		        Drawing = geometryDrawing,
+-	        };
++	        // Wine/XWayland renders every transparent hole in the window-level
++	        // WPF opacity mask as an opaque black rectangle. A low non-zero mask
++	        // alpha is not sufficient: it is multiplied by the window's 1/255
++	        // transparent background and quantized back to zero. This build is
++	        // Wine-specific, so disable only the dynamic window-level mask. HDT's
++	        // panels and card tooltips keep their own normal visibility behavior.
++	        GC.KeepAlive(WineOpacityMaskMarker);
++	        Mask = null;
+         }
+ 
+         // Property change handler for data binding or UI update
+diff --git a/Hearthstone Deck Tracker/Windows/OverlayWindow.Initialize.cs b/Hearthstone Deck Tracker/Windows/OverlayWindow.Initialize.cs
+index 16d6e0dd..c8263eba 100644
+--- a/Hearthstone Deck Tracker/Windows/OverlayWindow.Initialize.cs	
++++ b/Hearthstone Deck Tracker/Windows/OverlayWindow.Initialize.cs	
+@@ -150,6 +150,7 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 			_clickableElements.Add(BattlegroundsSession.BtnOptions);
+ 			_clickableElements.Add(BattlegroundsSession.BattlegroundsSessionPanelTopGroup);
+ 			_clickableElements.Add(BattlegroundsSession.BgLatestGamesSectionHeader);
++			_clickableElements.Add(BattlegroundsSession.BtnShowMoreGames);
+ 		}
+ 	}
+ }
+diff --git a/Hearthstone Deck Tracker/Windows/OverlayWindow.MouseOverDetection.cs b/Hearthstone Deck Tracker/Windows/OverlayWindow.MouseOverDetection.cs
+index c2929431..98ac6e94 100644
+--- a/Hearthstone Deck Tracker/Windows/OverlayWindow.MouseOverDetection.cs	
++++ b/Hearthstone Deck Tracker/Windows/OverlayWindow.MouseOverDetection.cs	
+@@ -51,6 +51,13 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 		public int? _leaderboardHoveredEntityId = null;
+ 		private bool _mouseIsOverLeaderboardIcon = false;
+ 		private const int MouseLeaveEventDelay = 200;
++		private const string WineBattlegroundsClickthroughMarker = "HDT_WINE_BATTLEGROUNDS_CLICKTHROUGH_ZONE";
++		// Fixed WPF coordinates for the current DP-1 overlay. There are no interactive
++		// HDT controls in this part of the board. Keep it click-through independently
++		// of game-mode detection: while entering/leaving Battlegrounds or returning to
++		// its menu IsBattlegroundsMatch can briefly be false, and Wine can otherwise
++		// reactivate a stale full-window WPF hit target here.
++		private static readonly Rect WineBattlegroundsClickthroughRegion = new(250, 140, 1300, 620);
+ 
+ 		private Point CenterOfHand => new Point((float)Width * 0.5 - Height * 0.035, (float)Height * 0.95);
+ 
+@@ -488,6 +495,11 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 
+ 			var clickableMouseOver = behind ? NoMouseOver
+ 				: _clickableElements.Where(e => ElementContains(e, (Point)cursorPos, _scaleCache.Dict, _transformCache.Dict)).ToList();
++			if(WineBattlegroundsClickthroughRegion.Contains(cursorPos.Value))
++			{
++				clickableMouseOver.Clear();
++				GC.KeepAlive(WineBattlegroundsClickthroughMarker);
++			}
+ 			SetClickthrough(clickableMouseOver.Count == 0);
+ 
+ 			var hoverableMouseOver = behind ? NoMouseOver
+diff --git a/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs b/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs
+index 9e7f26d8..9f4952a4 100644
+--- a/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs	
++++ b/Hearthstone Deck Tracker/Windows/OverlayWindow.Update.cs	
+@@ -31,6 +31,20 @@ namespace Hearthstone_Deck_Tracker.Windows
+ {
+ 	public partial class OverlayWindow
+ 	{
++		// Wine can report the virtual desktop as Hearthstone's client rectangle
++		// during minimize/restore. That permanently moves all center-anchored
++		// overlay elements until the next successful position update. This local
++		// build targets the fixed DP-1 game area, so keep one invariant coordinate
++		// system for the complete lifetime of the overlay window. These are the
++		// physical Win32/X11 coordinates reported by Wine. WPF/Hyprland maps them
++		// through the monitor's 1.25 scale to approximately 11,50 2730x1091.
++		private const int WineFixedOverlayLeft = 3453;
++		private const int WineFixedOverlayTop = 62;
++		private const int WineFixedOverlayWidth = 3412;
++		private const int WineFixedOverlayHeight = 1363;
++		private const string WineFixedOverlayMarker = "HDT_WINE_FIXED_OVERLAY_2730X1091";
++		private bool _wineFixedOverlayBoundsLogged;
++
+ 		private async void SetTopmost()
+ 		{
+ 			var hsWindow = User32.GetHearthstoneWindow();
+@@ -46,15 +60,17 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 				if(_overlayZState == OverlayZState.Behind)
+ 					return;
+ 
+-				// the topmost style can stay set while the window has dropped into the regular z-order band
++				// Wine build: the X11 stacking order is enforced by the external overlay
++				// guard, and Wine's EnumWindows z-order does not track it. Trust the
++				// topmost style alone (pre-1.58.2 behaviour); SetTopmost runs on every
++				// deactivation, so a false IsAbove would re-toggle Topmost 20 times
++				// against Hearthstone each time.
+ 				var isTopmost = User32.IsTopmost(hwnd);
+-				if(isTopmost && User32.IsAbove(hwnd, hsWindow))
++				if(isTopmost)
+ 				{
+ 					Log.Info($"Overlay is topmost after {i + 1} tries.");
+ 					return;
+ 				}
+-				if(isTopmost)
+-					Log.Warn("Overlay has topmost style but is behind Hearthstone");
+ 
+ 				Topmost = false;
+ 				Topmost = true;
+@@ -377,19 +393,37 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 
+ 		public void UpdatePosition()
+ 		{
+-			if(Helper.GameWindowState == WindowState.Minimized)
++			// Never sample geometry while Unity is minimized. Wine may return a
++			// transient virtual-desktop-sized client rect at that point.
++			if(Helper.GameWindowState == WindowState.Minimized
++			   || User32.GetHearthstoneWindowState() == WindowState.Minimized)
+ 				return;
+ 
+-			var hsRect = User32.GetHearthstoneRect(true);
++			var observedHsRect = User32.GetHearthstoneRect(true);
+ 
+ 			//hs window has height 0 if it just launched, screwing things up if the tracker is started before hs is.
+ 			//this prevents that from happening.
+-			if(hsRect.Height == 0 || (!IsContentVisible && Core.Windows.CapturableOverlay == null))
++			if(observedHsRect.Height == 0 || (!IsContentVisible && Core.Windows.CapturableOverlay == null))
+ 				return;
+ 
++			if(!_wineFixedOverlayBoundsLogged)
++			{
++				Log.Info($"{WineFixedOverlayMarker}: locking overlay to "
++					+ $"{WineFixedOverlayLeft},{WineFixedOverlayTop} "
++					+ $"{WineFixedOverlayWidth}x{WineFixedOverlayHeight}; "
++					+ $"Wine reported {observedHsRect.Left},{observedHsRect.Top} "
++					+ $"{observedHsRect.Width}x{observedHsRect.Height}");
++				_wineFixedOverlayBoundsLogged = true;
++			}
++
+ 			var prevWidth = Width;
+ 			var prevHeight = Height;
+-			SetRect(hsRect.Top, hsRect.Left, hsRect.Width, hsRect.Height);
++			SetRect(
++				WineFixedOverlayTop,
++				WineFixedOverlayLeft,
++				WineFixedOverlayWidth,
++				WineFixedOverlayHeight
++			);
+ 			if(Width != prevWidth || Height != prevHeight)
+ 			{
+ 				OnPropertyChanged(nameof(BoardWidth));
+diff --git a/Hearthstone Deck Tracker/Windows/OverlayWindow.xaml.cs b/Hearthstone Deck Tracker/Windows/OverlayWindow.xaml.cs
+index c1ca58e4..c3028b03 100644
+--- a/Hearthstone Deck Tracker/Windows/OverlayWindow.xaml.cs	
++++ b/Hearthstone Deck Tracker/Windows/OverlayWindow.xaml.cs	
+@@ -698,6 +698,18 @@ namespace Hearthstone_Deck_Tracker.Windows
+ 
+ 		private void Window_Closing(object sender, CancelEventArgs e)
+ 		{
++			// The overlay is a long-lived application window and must only be
++			// destroyed as part of HDT's coordinated shutdown. Under Wine the
++			// no-activate overlay can sporadically receive a close request while
++			// Hearthstone is changing focus. Once a WPF Window has closed it can
++			// never be shown again, leaving the update loop permanently broken.
++			if(!Core.IsShuttingDown)
++			{
++				e.Cancel = true;
++				Log.Warn("Ignored unexpected overlay close request");
++				return;
++			}
++
+ 			StopInteractivityUpdates();
+ 			StopRightClickPolling();
+ 			UnhookGameWindow();
